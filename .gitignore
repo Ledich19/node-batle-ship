@@ -1,5 +1,8 @@
 # dependencies
 /node_modules
+.env
+sessions.json
+dist
 
 # System Files
 .DS_Store
