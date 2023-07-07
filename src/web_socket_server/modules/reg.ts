@@ -2,7 +2,6 @@ import WebSocket from 'ws';
 import { users } from '../../data/users.js';
 
 const reg = (ws: WebSocket & { userId: number }, data: string) => {
-
   const { name, password } = JSON.parse(data);
   const user = users.getByName(name);
   const resData = {
@@ -24,9 +23,9 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
     resData.errorText = 'password minimum 5 characters';
   }
 
-if (user && user.password === password) {
+  if (user && user.password === password) {
     console.log(user);
-    
+
     resData.name = user.name;
     resData.index = user.id;
   } else {
@@ -48,7 +47,33 @@ if (user && user.password === password) {
     id: 0,
   };
 
-  resData.index > 0 ? ws.userId = resData.index : null;
+  const roomsRes = {
+    type: 'update_room',
+    data: JSON.stringify([
+      {
+        roomId: 0,
+        roomUsers: [
+          {
+            name: '<string>',
+            index: 8,
+          },
+        ],
+      },
+      {
+        roomId: 0,
+        roomUsers: [
+          {
+            name: 'user',
+            index: 8,
+          },
+        ],
+      },
+    ]),
+    id: 0,
+  };
+
+  resData.index > 0 ? (ws.userId = resData.index) : null;
   ws.send(JSON.stringify(reqObj));
+  ws.send(JSON.stringify(roomsRes));
 };
 export default reg;

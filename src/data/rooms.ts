@@ -7,12 +7,19 @@ const roomsData: RoomType[] = [
       {
         name: '<string>',
         index: 0,
-        field: null,
       },
       {
         name: '<string>',
         index: 0,
-        field: null,
+      },
+    ],
+  },
+  {
+    roomId: 0,
+    roomUsers: [
+      {
+        name: '<string>',
+        index: 0,
       },
     ],
   },
@@ -32,20 +39,13 @@ export const create = (room: RoomType): RoomType => {
   roomsData.push(room)
   return room
 };
-const setShips = (roomId:number , userId:number , field: number[][]) => {
-  const room = roomsData.find((room) => room.roomId === roomId )
-  room?.roomUsers.map((user) => {if (user.index === userId) {
-    return {...user,field: field}
-  }})
-  return room?.roomUsers.length && room?.roomUsers.every((user) => user.field !== null)
-}
+
 
 export const rooms = {
   createId,
   get,
   getById,
   create,
-  setShips,
 };
 // export const createId = () => {
 // }

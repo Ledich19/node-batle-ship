@@ -4,15 +4,20 @@ export type UserType = {
   password: string;
   wins: number;
 };
+export type FieldType = {
+  roomId: number;
+  userId: number;
+  field: number[][] | null;
+};
 
 export type RoomType = {
   roomId: number;
   roomUsers: {
     name: string;
     index: number;
-    field: number[][] | null;
   }[];
 };
+
 export type ShipType = {
   position: {
     x: number;

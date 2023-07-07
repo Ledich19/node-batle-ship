@@ -2,6 +2,7 @@ import WebSocket from 'ws';
 import { users } from '../../data/users.js';
 import { ShipType } from '../../types.js';
 import { rooms } from '../../data/rooms.js';
+import { fields } from '../../data/fields.js';
 
 const addShips = (ws: WebSocket & { userId: number }, data: string) => {
   const FiELD_SIZE = 10;
@@ -24,7 +25,7 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
       }
     }
   });
-  rooms.setShips(gameId, indexPlayer, field);
+  fields.create(gameId, indexPlayer, field)
   field.forEach((element) => {
     console.log(`${element}`);
   });
