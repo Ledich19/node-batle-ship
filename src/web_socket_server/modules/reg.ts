@@ -57,5 +57,6 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
   resData.index > 0 ? (ws.userId = resData.index) : null;
   ws.send(JSON.stringify(reqObj));
   ws.send(JSON.stringify(roomsRes));
+
 };
 export default reg;

@@ -1,7 +1,5 @@
 import WebSocket from 'ws';
-import { users } from '../../data/users.js';
 import { ShipType } from '../../types.js';
-import { rooms } from '../../data/rooms.js';
 import { fields } from '../../data/fields.js';
 
 const addShips = (ws: WebSocket & { userId: number }, data: string) => {
@@ -16,7 +14,7 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
     .map(() => Array(FiELD_SIZE).fill(0));
 
   ships.forEach((ship: ShipType) => {
-    const { position, direction, type, length } = ship;
+    const { position, direction, length } = ship;
     for (let i = 0; i < length; i++) {
       if (direction) {
         field[position.y + i][position.x] = 1;
