@@ -7,6 +7,8 @@ const createRoom = (ws: WebSocket & { userId: number }, data: string) => {
   const roomId = rooms.createId();
   const userId = ws.userId;
   const user = users.getById(userId);
+  console.log(userId);
+  
   if (!user) {
     return;
   }
@@ -17,7 +19,7 @@ const createRoom = (ws: WebSocket & { userId: number }, data: string) => {
       {
         name: user.name,
         index: ws.userId,
-        field: Array(FiALD_SIZE).fill(Array(FiALD_SIZE).fill(0)),
+        field: null,
       },
     ],
   };

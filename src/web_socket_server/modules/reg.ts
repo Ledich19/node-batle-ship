@@ -48,7 +48,7 @@ if (user && user.password === password) {
     id: 0,
   };
 
-  resData.index > 0 ? ws.userId : null;
+  resData.index > 0 ? ws.userId = resData.index : null;
   ws.send(JSON.stringify(reqObj));
 };
 export default reg;

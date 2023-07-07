@@ -5,13 +5,20 @@ export type UserType = {
   wins: number;
 };
 
-
-
 export type RoomType = {
   roomId: number;
   roomUsers: {
     name: string;
     index: number;
-    field: number[][];
+    field: number[][] | null;
   }[];
+};
+export type ShipType = {
+  position: {
+    x: number;
+    y: number;
+  };
+  direction: boolean;
+  length: number;
+  type: 'small' | 'medium' | 'large' | 'huge';
 };
