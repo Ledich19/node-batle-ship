@@ -1,5 +1,6 @@
 import WebSocket from 'ws';
 import { users } from '../../data/users.js';
+import { rooms } from '../../data/rooms.js';
 
 const reg = (ws: WebSocket & { userId: number }, data: string) => {
   const { name, password } = JSON.parse(data);
@@ -49,26 +50,7 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
 
   const roomsRes = {
     type: 'update_room',
-    data: JSON.stringify([
-      {
-        roomId: 0,
-        roomUsers: [
-          {
-            name: '<string>',
-            index: 8,
-          },
-        ],
-      },
-      {
-        roomId: 0,
-        roomUsers: [
-          {
-            name: 'user',
-            index: 8,
-          },
-        ],
-      },
-    ]),
+    data: JSON.stringify(rooms.get().filter((room) => room.roomUsers.length == 1) ),
     id: 0,
   };
 
