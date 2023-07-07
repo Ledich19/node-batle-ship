@@ -1,6 +1,4 @@
-import WebSocket, { WebSocketServer } from 'ws';
-import httpServer from '../http_server/index.js';
-import { RoomType, UserType } from '../types.js';
+import WebSocket from 'ws';
 import reg from './modules/reg.js';
 import createRoom from './modules/create-room.js';
 import addShips from './modules/add-ships.js';

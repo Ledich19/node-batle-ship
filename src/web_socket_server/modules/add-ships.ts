@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { ShipType } from '../../types.js';
+import { ShipType } from '../../app/types.js';
 import { fields } from '../../data/fields.js';
 
 const addShips = (ws: WebSocket & { userId: number }, data: string) => {

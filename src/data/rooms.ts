@@ -1,4 +1,4 @@
-import { RoomType } from '../types.js';
+import { RoomType } from '../app/types.js';
 
 const roomsData: RoomType[] = [
   {

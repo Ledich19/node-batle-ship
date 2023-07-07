@@ -1,8 +1,6 @@
 import WebSocket from 'ws';
 import { users } from '../../data/users.js';
-import { ShipType } from '../../types.js';
 import { rooms } from '../../data/rooms.js';
-import { fields } from '../../data/fields.js';
 import { wss } from '../../index.js';
 
 type CustomWebSocket = WebSocket & { userId: number };

@@ -8,10 +8,11 @@ export const server = http.createServer(handleHTTP);
 export const wss = new WebSocketServer({ server: server });
 wss.on('connection', handleWebSocket);
 
-server.on('upgrade', function upgrade(request, socket, head) {
+server.on('upgrade', function upgrade() {
   console.log('--- upgrade:');
 });
+// server.on('upgrade', function upgrade(request, socket, head) {
+//   console.log('--- upgrade:');
+// });
 
-// console.log(`Start static http server on the ${HTTP_PORT} port!`);
-// server.listen(HTTP_PORT);
 

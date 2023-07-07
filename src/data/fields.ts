@@ -1,4 +1,4 @@
-import { FieldType, RoomType } from '../types.js';
+import { FieldType } from '../app/types.js';
 
 const fieldsData: FieldType[] = [
   {

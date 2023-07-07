@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { UserType } from '../types.js';
+import { UserType } from '../app/types.js';
 import { log } from 'console';
 
 const USERS_DATA_FILE = new URL('usersData.json', import.meta.url);
