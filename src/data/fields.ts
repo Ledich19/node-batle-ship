@@ -5,6 +5,7 @@ const fieldsData: FieldType[] = [
     roomId: 0,
     userId: 0,
     field: null,
+    ships: [],
   },
 ];
 
@@ -14,20 +15,26 @@ export const get = (): FieldType[] => {
 export const getById = (roomId: number, userId: number): FieldType | undefined => {
   return fieldsData.find((field) => field.roomId === roomId && field.userId === userId);
 };
-const create = (roomId: number, userId: number, field: number[][]) => {
+const create = (roomId: number, userId: number, field: number[][], ships: []) => {
   fieldsData.push({
     roomId,
     userId,
     field,
+    ships
   });
 
   return fieldsData.find((field) => field.roomId === roomId && field.userId === userId);
+};
+const check = (roomId: number): boolean => {
+  const fields = fieldsData.filter((field) => field.roomId === roomId);
+  return fields.length === 2 ;
 };
 
 export const fields = {
   get,
   getById,
   create,
+  check,
 };
 // export const createId = () => {
 // }

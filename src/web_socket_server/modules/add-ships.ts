@@ -1,13 +1,13 @@
 import WebSocket from 'ws';
-import { ShipType } from '../../app/types.js';
+import { CustomWebSocket, ShipType } from '../../app/types.js';
 import { fields } from '../../data/fields.js';
+import { rooms } from '../../data/rooms.js';
+import { wss } from '../../index.js';
 
 const addShips = (ws: WebSocket & { userId: number }, data: string) => {
   const FiELD_SIZE = 10;
 
   const { gameId, ships, indexPlayer } = JSON.parse(data);
-
-  console.log(gameId, ships, indexPlayer);
 
   const field = Array(FiELD_SIZE)
     .fill(0)
@@ -23,9 +23,38 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
       }
     }
   });
-  fields.create(gameId, indexPlayer, field)
+  fields.create(gameId, indexPlayer, field, ships);
   field.forEach((element) => {
     console.log(`${element}`);
   });
+
+
+  if (fields.check(gameId)) {
+    const room = rooms.getById(gameId)
+    const currentFields = fields.get().filter((field) => field.roomId === gameId )
+    const playersId = currentFields.map((field) => field.userId);
+    const messages = currentFields.map((field) => {
+      const data = {
+        ships: field.ships,
+        currentPlayerIndex: field.userId,
+      };
+      const obg = {
+        type: 'start_game',
+        data: JSON.stringify(data),
+        id: 0,
+      };
+      return obg
+    });
+    
+    wss.clients.forEach((client) => {
+      const customClient = client as CustomWebSocket;
+      if (client.readyState === WebSocket.OPEN && playersId?.includes(customClient.userId)) {
+        messages.forEach((message) => {
+          client.send(JSON.stringify(message));
+        })
+      }
+    });
+
+  }
 };
 export default addShips;

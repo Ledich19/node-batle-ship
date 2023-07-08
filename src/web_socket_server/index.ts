@@ -24,6 +24,9 @@ const handleWebSocket = (ws: WebSocket & { userId: number }) => {
     if (dataParsed.type === 'add_user_to_room') {      
       addUserToRoom(ws, dataParsed.data)
     }
+    if (dataParsed.type === 'attack') {      
+      addUserToRoom(ws, dataParsed.data)
+    }
     console.log('received: %s', data);
   });
 

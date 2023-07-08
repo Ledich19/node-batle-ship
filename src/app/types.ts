@@ -1,3 +1,5 @@
+import WebSocket from "ws";
+
 export type UserType = {
   id: number;
   name: string;
@@ -8,6 +10,7 @@ export type FieldType = {
   roomId: number;
   userId: number;
   field: number[][] | null;
+  ships: []
 };
 
 export type RoomType = {
@@ -27,3 +30,4 @@ export type ShipType = {
   length: number;
   type: 'small' | 'medium' | 'large' | 'huge';
 };
+export type CustomWebSocket = WebSocket & { userId: number };
