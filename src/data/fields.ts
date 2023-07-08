@@ -15,19 +15,29 @@ export const get = (): FieldType[] => {
 export const getById = (roomId: number, userId: number): FieldType | undefined => {
   return fieldsData.find((field) => field.roomId === roomId && field.userId === userId);
 };
-const create = (roomId: number, userId: number, field: number[][], ships: []) => {
+const create = (roomId: number, userId: number, field: string[][], ships: []) => {
   fieldsData.push({
     roomId,
     userId,
     field,
-    ships
+    ships,
   });
 
   return fieldsData.find((field) => field.roomId === roomId && field.userId === userId);
 };
 const check = (roomId: number): boolean => {
   const fields = fieldsData.filter((field) => field.roomId === roomId);
-  return fields.length === 2 ;
+  return fields.length === 2;
+};
+
+const update = (
+  { gameID, x, y, indexPlayer }: { gameID: number; x: number; y: number; indexPlayer: number },
+  sign: string
+) => {
+  const field = fieldsData.find((field) => field.roomId === gameID && field.userId === indexPlayer);
+  if (field?.field) {
+    field.field[y][x] = sign;
+  }
 };
 
 export const fields = {
@@ -35,6 +45,7 @@ export const fields = {
   getById,
   create,
   check,
+  update,
 };
 // export const createId = () => {
 // }

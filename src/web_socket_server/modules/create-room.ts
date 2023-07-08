@@ -13,6 +13,7 @@ const createRoom = (ws: WebSocket & { userId: number }) => {
   }
 
   const room = {
+    currentPlayer: ws.userId,
     roomId: roomId,
     roomUsers: [
       {
@@ -35,6 +36,6 @@ const createRoom = (ws: WebSocket & { userId: number }) => {
   // };
   // ws.send(JSON.stringify(reqObj));
 
-  console.log('CREATE_ROOM:');
+
 };
 export default createRoom;

@@ -13,13 +13,11 @@ const addUserToRoom = (ws: WebSocket & { userId: number }, data: string) => {
     const room = rooms.add({ name: user.name, index: user.id }, indexRoom);
     const playersId = room?.roomUsers.map((user) => user.index);
 
-    console.log('room', room);
-    
 
     wss.clients.forEach((client) => {
       const customClient = client as CustomWebSocket;
       if (client.readyState === WebSocket.OPEN && playersId?.includes(customClient.userId)) {
-        console.log('customClient------', customClient.userId);
+
 
         const resData = JSON.stringify({
           idGame: room?.roomId,

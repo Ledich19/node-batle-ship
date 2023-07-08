@@ -25,7 +25,7 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
   }
 
   if (user && user.password === password) {
-    console.log(user);
+
 
     resData.name = user.name;
     resData.index = user.id;

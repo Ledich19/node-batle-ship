@@ -3,6 +3,7 @@ import reg from './modules/reg.js';
 import createRoom from './modules/create-room.js';
 import addShips from './modules/add-ships.js';
 import addUserToRoom from './modules/add-user-to-room.js';
+import attack from './modules/attack.js';
 
 
 
@@ -25,7 +26,7 @@ const handleWebSocket = (ws: WebSocket & { userId: number }) => {
       addUserToRoom(ws, dataParsed.data)
     }
     if (dataParsed.type === 'attack') {      
-      addUserToRoom(ws, dataParsed.data)
+      attack(ws, dataParsed.data)
     }
     console.log('received: %s', data);
   });

@@ -9,11 +9,12 @@ export type UserType = {
 export type FieldType = {
   roomId: number;
   userId: number;
-  field: number[][] | null;
+  field: string[][] | null;
   ships: []
 };
 
 export type RoomType = {
+  currentPlayer: number;
   roomId: number;
   roomUsers: {
     name: string;
