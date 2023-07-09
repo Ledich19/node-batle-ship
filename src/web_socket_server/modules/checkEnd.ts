@@ -9,6 +9,12 @@ import { FieldType } from '../../app/types.js';
 
 const checkEnd = (ws: WebSocket & { userId: number }, field: string[][], player: number) => {
   console.log("CHECK: ",player);
+  console.log('ADD_SHIPS:');
+  field.forEach((element) => {
+    console.log(element.toString());
+  });
+
+
   if (!field) {
     return;
   }
@@ -33,7 +39,7 @@ console.log("WINNER: ",player);
       client.send(JSON.stringify(winnerObg));
     });
 
-    users
+    users.setWinner(player)
   }
 
 };

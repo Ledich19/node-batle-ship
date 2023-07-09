@@ -28,13 +28,16 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
   // field.forEach((element) => {
   //   console.log(`${element}`);
   // });
+  console.log('ADD_SHIPS:');
+  field.forEach((element) => {
+    console.log(element.toString());
+  });
 
   if (fields.check(gameId)) {
     const room = rooms.getById(gameId);
     const currentFields = fields.get().filter((field) => field.roomId === gameId);
     const playersId = currentFields.map((field) => field.userId);
 
-    
     const currentPlayerId = playersId[Math.round(Math.random())];
     const curentPlayer = {
       type: 'turn',
@@ -43,8 +46,8 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
       }),
       id: 0,
     };
-    rooms.setNex( currentPlayerId, gameId,);
-    
+    rooms.setNex(currentPlayerId, gameId);
+
     const messages = currentFields.map((field) => {
       const data = {
         ships: field.ships,
@@ -55,23 +58,20 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
         data: JSON.stringify(data),
         id: 0,
       };
-      return {data: obg, id: field.userId};
+      return { data: obg, id: field.userId };
     });
-    
+
     wss.clients.forEach((client) => {
       const customClient = client as CustomWebSocket;
       if (client.readyState === WebSocket.OPEN && playersId?.includes(customClient.userId)) {
         messages.forEach((message) => {
           if (customClient.userId === message.id) {
             client.send(JSON.stringify(message.data));
-            
           }
         });
         client.send(JSON.stringify(curentPlayer));
       }
     });
   }
-
-  
 };
 export default addShips;
