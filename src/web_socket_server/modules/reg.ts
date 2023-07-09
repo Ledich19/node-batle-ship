@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import { users } from '../../data/users.js';
 import { rooms } from '../../data/rooms.js';
+import { createResponse } from '../../app/healpers.js';
 
 const reg = (ws: WebSocket & { userId: number }, data: string) => {
   const { name, password } = JSON.parse(data);
@@ -25,8 +26,6 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
   }
 
   if (user && user.password === password) {
-
-
     resData.name = user.name;
     resData.index = user.id;
   } else {
@@ -42,21 +41,10 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
     resData.index = createdUser.id;
   }
 
-  const reqObj = {
-    type: 'reg',
-    data: JSON.stringify(resData),
-    id: 0,
-  };
-
-  const roomsRes = {
-    type: 'update_room',
-    data: JSON.stringify(rooms.get().filter((room) => room.roomUsers.length == 1) ),
-    id: 0,
-  };
-
   resData.index > 0 ? (ws.userId = resData.index) : null;
-  ws.send(JSON.stringify(reqObj));
-  ws.send(JSON.stringify(roomsRes));
-
+  const roomsWithOnePlayer = rooms.get().filter((room) => room.roomUsers.length == 1);
+  
+  ws.send(createResponse('reg', resData));
+  ws.send(createResponse('update_room', roomsWithOnePlayer));
 };
 export default reg;

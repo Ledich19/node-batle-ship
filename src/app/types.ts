@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+export type StatusType = 'miss' | 'killed' | 'shot'
 
 export type UserType = {
   id: number;

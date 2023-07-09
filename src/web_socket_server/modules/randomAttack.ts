@@ -3,8 +3,9 @@ import { rooms } from '../../data/rooms.js';
 import { wss } from '../../index.js';
 import { fields } from '../../data/fields.js';
 import { DAMAGE, MISS, SEA, SHIP } from '../../app/variables.js';
-import { checkSurroundingCells } from '../../app/healpers.js';
+import { checkSurroundingCells, createResponse } from '../../app/healpers.js';
 import checkEnd from './checkEnd.js';
+import { StatusType } from '../../app/types.js';
 
 const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
   const { gameId, indexPlayer } = JSON.parse(data);
@@ -33,7 +34,7 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
   });
   const randomElement = possibilityOfShot[Math.floor(Math.random() * possibilityOfShot.length)];
 
-  let status: 'miss' | 'killed' | 'shot' = 'miss';
+  let status: StatusType = 'miss';
   if (field?.field && anotherPlayer && room?.currentPlayer === indexPlayer) {
     const point =
       field.field[randomElement.y][randomElement.x] === SHIP
@@ -64,25 +65,14 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
       currentPlayer: indexPlayer,
       status: status,
     };
-    const resObj = {
-      type: 'attack',
-      data: JSON.stringify(data),
-      id: 0,
-    };
 
     const nextIndex = status === 'miss' ? anotherPlayer : indexPlayer;
-    const nextPlayer = {
-      type: 'turn',
-      data: JSON.stringify({
-        currentPlayer: nextIndex,
-      }),
-      id: 0,
-    };
+
     rooms.setNex(nextIndex, gameId);
 
     wss.clients.forEach((client) => {
-      client.send(JSON.stringify(resObj));
-      client.send(JSON.stringify(nextPlayer));
+      client.send(createResponse('attack', data));
+      client.send(createResponse('turn', { currentPlayer: nextIndex }));
     });
 
     if (!updatedField?.field) {

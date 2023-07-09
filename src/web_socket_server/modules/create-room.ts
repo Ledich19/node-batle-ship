@@ -1,6 +1,8 @@
 import WebSocket from 'ws';
 import { rooms } from '../../data/rooms.js';
 import { users } from '../../data/users.js';
+import { wss } from '../../index.js';
+import { createResponse } from '../../app/healpers.js';
 
 const createRoom = (ws: WebSocket & { userId: number }) => {
   const roomId = rooms.createId();
@@ -23,19 +25,12 @@ const createRoom = (ws: WebSocket & { userId: number }) => {
       },
     ],
   };
-  rooms.create(room);
+  const roomsData = rooms.create(room);
 
-  // const resData = JSON.stringify({
-  //   idGame: roomId,
-  //   idPlayer: userId,
-  // });
-  // const reqObj = {
-  //   type: 'create_game',
-  //   data: resData,
-  //   id: 0,
-  // };
-  // ws.send(JSON.stringify(reqObj));
-
+  const roomsWithOnePlayer = roomsData.filter((room) => room.roomUsers.length == 1);
+  wss.clients.forEach((client) => {
+    client.send(createResponse('update_room', roomsWithOnePlayer));
+  });
 
 };
 export default createRoom;

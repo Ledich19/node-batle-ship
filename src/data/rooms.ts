@@ -23,10 +23,10 @@ export const get = (): RoomType[] => {
 export const getById = (id: number): RoomType | undefined => {
   return roomsData.find((room) => room.roomId === id);
 };
-export const create = (room: RoomType): RoomType => {
+export const create = (room: RoomType): RoomType[] => {
 
   roomsData.push(room);
-  return room;
+  return roomsData;
 };
 export const add = (user: { name: string; index: number }, indexRoom: number): RoomType | null => {
   const room = roomsData.find((room) => room.roomId === indexRoom);

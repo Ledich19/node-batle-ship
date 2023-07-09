@@ -4,6 +4,7 @@ import { fields } from '../../data/fields.js';
 import { rooms } from '../../data/rooms.js';
 import { wss } from '../../index.js';
 import { SEA, SHIP } from '../../app/variables.js';
+import { createResponse } from '../../app/healpers.js';
 
 const addShips = (ws: WebSocket & { userId: number }, data: string) => {
   const FiELD_SIZE = 10;
@@ -30,27 +31,17 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
     const currentFields = fields.get().filter((field) => field.roomId === gameId);
     const playersId = currentFields.map((field) => field.userId);
 
-    const currentPlayerId = playersId[Math.round(Math.random())];
-    const curentPlayer = {
-      type: 'turn',
-      data: JSON.stringify({
-        currentPlayer: currentPlayerId,
-      }),
-      id: 0,
-    };
-    rooms.setNex(currentPlayerId, gameId);
+    const currentPlayer = playersId[Math.round(Math.random())];
+
+    rooms.setNex(currentPlayer, gameId);
 
     const messages = currentFields.map((field) => {
       const data = {
         ships: field.ships,
         currentPlayerIndex: field.userId,
       };
-      const obg = {
-        type: 'start_game',
-        data: JSON.stringify(data),
-        id: 0,
-      };
-      return { data: obg, id: field.userId };
+
+      return { data: createResponse('start_game', data), id: field.userId };
     });
 
     wss.clients.forEach((client) => {
@@ -61,7 +52,8 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
             client.send(JSON.stringify(message.data));
           }
         });
-        client.send(JSON.stringify(curentPlayer));
+
+        client.send(createResponse('turn', { currentPlayer }));
       }
     });
   }

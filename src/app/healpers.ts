@@ -8,3 +8,22 @@ export const checkSurroundingCells = (field: string[][], x: number, y: number) =
 
   return top || bottom || left || right;
 };
+
+type ResponseType =
+  | 'reg'
+  | 'turn'
+  | 'update_winners'
+  | 'create_game'
+  | 'update_room'
+  | 'start_game'
+  | 'attack'
+  | 'finish';
+
+export const createResponse = <T>(type: ResponseType, data: T): string => {
+  const response = {
+    type: type,
+    data: JSON.stringify(data),
+    id: 0,
+  };
+  return JSON.stringify(response);
+};

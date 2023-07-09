@@ -2,6 +2,7 @@ import WebSocket from 'ws';
 import { users } from '../../data/users.js';
 import { rooms } from '../../data/rooms.js';
 import { wss } from '../../index.js';
+import { createResponse } from '../../app/healpers.js';
 
 type CustomWebSocket = WebSocket & { userId: number };
 
@@ -18,17 +19,11 @@ const addUserToRoom = (ws: WebSocket & { userId: number }, data: string) => {
       const customClient = client as CustomWebSocket;
       if (client.readyState === WebSocket.OPEN && playersId?.includes(customClient.userId)) {
 
-
-        const resData = JSON.stringify({
+        const resData = {
           idGame: room?.roomId,
           idPlayer: customClient.userId,
-        });
-        const reqObj = {
-          type: 'create_game',
-          data: resData,
-          id: 0,
-        };
-        client.send(JSON.stringify(reqObj));
+        }
+        client.send(createResponse('create_game', resData));
       }
     });
   }

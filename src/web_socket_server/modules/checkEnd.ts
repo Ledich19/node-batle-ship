@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 import { DAMAGE } from '../../app/variables.js';
 import { wss } from '../../index.js';
 import { users } from '../../data/users.js';
-
+import { createResponse } from '../../app/healpers.js';
 
 const checkEnd = (ws: WebSocket & { userId: number }, field: string[][], player: number) => {
   console.log('CHECK: ', player);
@@ -22,19 +22,9 @@ const checkEnd = (ws: WebSocket & { userId: number }, field: string[][], player:
     return total;
   }, 0);
   if (damagePoints === 20) {
-    const winnerObg = {
-      type: 'finish',
-      data: JSON.stringify({
-        winPlayer: player,
-      }),
-      id: 0,
-    };
-  
-
     wss.clients.forEach((client) => {
-      client.send(JSON.stringify(winnerObg));
+      client.send(createResponse('finish', { winPlayer: player }));
     });
-
     users.setWinner(player);
   }
 };
