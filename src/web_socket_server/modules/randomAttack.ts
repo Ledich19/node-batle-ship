@@ -6,6 +6,7 @@ import { fields } from '../../data/fields.js';
 import { DAMAGE, SEA, SHIP } from '../../app/variables.js';
 import { log } from 'console';
 import { checkSurroundingCells } from '../../app/healpers.js';
+import checkEnd from './checkEnd.js';
 
 const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
   const userId = ws.userId;
@@ -34,7 +35,6 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
       }
     });
   });
-  console.log('FIELD_VALUE:', possibilityOfShot);
   const randomElement = possibilityOfShot[Math.floor(Math.random() * possibilityOfShot.length)];
 
   let status: 'miss' | 'killed' | 'shot' = 'miss';
@@ -47,7 +47,7 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
         : field.field[randomElement.y][randomElement.x];
     const result = checkSurroundingCells(field.field, randomElement.x, randomElement.y);
 
-    fields.update({ gameId: gameId, x: randomElement.x, y: randomElement.y, indexPlayer }, point);
+    const updatedField = fields.update({ gameId: gameId, x: randomElement.x, y: randomElement.y, indexPlayer }, point);
 
     if (result && point === DAMAGE) {
       status = 'shot';
@@ -84,6 +84,11 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
       client.send(JSON.stringify(resObj));
       client.send(JSON.stringify(nextPlayer));
     });
+
+    if (!updatedField?.field) {
+      return;
+    }
+    checkEnd(ws, updatedField.field, indexPlayer);
   }
 
 

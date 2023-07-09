@@ -52,6 +52,16 @@ export const create = (user: UserType): UserType => {
   saveUsersData();
   return user;
 };
+export const setWinner = (userId: number): UserType | undefined => {
+  loadUsersData();
+  const user = usersData.find((user) => user.id === userId);
+  if (!user) {
+    return;
+  }
+  user.wins = user.wins + 1;
+  saveUsersData();
+  return user;
+};
 
 export const users = {
   createId,
@@ -59,4 +69,5 @@ export const users = {
   getById,
   getByName,
   create,
+  setWinner,
 };

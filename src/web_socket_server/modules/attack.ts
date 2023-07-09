@@ -4,6 +4,7 @@ import { fields } from '../../data/fields.js';
 import { DAMAGE, SHIP } from '../../app/variables.js';
 import { wss } from '../../index.js';
 import { checkSurroundingCells } from '../../app/healpers.js';
+import checkEnd from './checkEnd.js';
 
 const attack = (ws: WebSocket & { userId: number }, data: string) => {
   const parsedData = JSON.parse(data);
@@ -19,7 +20,7 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
     ?.roomUsers.map((user) => user.index)
     .filter((user) => user !== indexPlayer)[0];
   const field = fields.getById(gameId, anotherPlayer || 0);
-  
+
   let status: 'miss' | 'killed' | 'shot' = 'miss';
 
   if (field?.field && anotherPlayer && room?.currentPlayer === indexPlayer) {
@@ -31,7 +32,7 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
         : field.field[y][x];
     const result = checkSurroundingCells(field.field, x, y);
 
-    fields.update({ gameId, x, y, indexPlayer }, point);
+    const updatedField = fields.update({ gameId, x, y, indexPlayer }, point);
 
     if (result && point === DAMAGE) {
       status = 'shot';
@@ -68,8 +69,12 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
       client.send(JSON.stringify(resObj));
       client.send(JSON.stringify(nextPlayer));
     });
-  }
 
+    if (!updatedField?.field) {
+      return;
+    }
+    checkEnd(ws, updatedField.field, indexPlayer);
+  }
   // const nextPlayer = {
   //   type: 'turn',
   //   data: JSON.stringify({
