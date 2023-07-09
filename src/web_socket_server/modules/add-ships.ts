@@ -40,8 +40,9 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
         ships: field.ships,
         currentPlayerIndex: field.userId,
       };
+      const obg = createResponse('start_game', data)
 
-      return { data: createResponse('start_game', data), id: field.userId };
+      return { data: obg, id: field.userId };
     });
 
     wss.clients.forEach((client) => {
@@ -49,7 +50,9 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
       if (client.readyState === WebSocket.OPEN && playersId?.includes(customClient.userId)) {
         messages.forEach((message) => {
           if (customClient.userId === message.id) {
-            client.send(JSON.stringify(message.data));
+
+            client.send(message.data);
+
           }
         });
 

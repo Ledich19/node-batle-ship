@@ -21,11 +21,15 @@ const checkEnd = (ws: WebSocket & { userId: number }, field: string[][], player:
     }
     return total;
   }, 0);
+
+  const winners = users.get().map((user) => ({name: user.name, wins: user.wins}))
+
   if (damagePoints === 20) {
     wss.clients.forEach((client) => {
       client.send(createResponse('finish', { winPlayer: player }));
+      client.send(createResponse('update_winners', winners));
     });
-    users.setWinner(player);
   }
+  users.setWinner(player);
 };
 export default checkEnd;

@@ -1,5 +1,15 @@
 import WebSocket from "ws";
 export type StatusType = 'miss' | 'killed' | 'shot'
+export type ResponseType =
+  | 'reg'
+  | 'turn'
+  | 'update_winners'
+  | 'create_game'
+  | 'update_room'
+  | 'start_game'
+  | 'attack'
+  | 'finish';
+
 
 export type UserType = {
   id: number;
