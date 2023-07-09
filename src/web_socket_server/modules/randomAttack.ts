@@ -1,15 +1,12 @@
 import WebSocket from 'ws';
-import { users } from '../../data/users.js';
 import { rooms } from '../../data/rooms.js';
 import { wss } from '../../index.js';
 import { fields } from '../../data/fields.js';
-import { DAMAGE, SEA, SHIP } from '../../app/variables.js';
-import { log } from 'console';
+import { DAMAGE, MISS, SEA, SHIP } from '../../app/variables.js';
 import { checkSurroundingCells } from '../../app/healpers.js';
 import checkEnd from './checkEnd.js';
 
 const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
-  const userId = ws.userId;
   const { gameId, indexPlayer } = JSON.parse(data);
 
   const anotherPlayer = rooms
@@ -20,8 +17,7 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
   const room = rooms.getById(gameId);
 
   const field = fields.getById(gameId, anotherPlayer || 0);
-  console.log(field);
-  
+
   const fieldValue = field?.field;
   if (!fieldValue) {
     return;
@@ -44,10 +40,14 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
         ? DAMAGE
         : field.field[randomElement.y][randomElement.x] === DAMAGE
         ? DAMAGE
-        : field.field[randomElement.y][randomElement.x];
+        : MISS;
+
     const result = checkSurroundingCells(field.field, randomElement.x, randomElement.y);
 
-    const updatedField = fields.update({ gameId: gameId, x: randomElement.x, y: randomElement.y, indexPlayer }, point);
+    const updatedField = fields.update(
+      { gameId: gameId, x: randomElement.x, y: randomElement.y, indexPlayer: anotherPlayer },
+      point
+    );
 
     if (result && point === DAMAGE) {
       status = 'shot';
@@ -90,9 +90,5 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
     }
     checkEnd(ws, updatedField.field, indexPlayer);
   }
-
-
-
-
 };
 export default randomAttack;

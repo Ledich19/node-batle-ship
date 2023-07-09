@@ -6,7 +6,7 @@ const createRoom = (ws: WebSocket & { userId: number }) => {
   const roomId = rooms.createId();
   const userId = ws.userId;
   const user = users.getById(userId);
-  console.log(userId);
+
   
   if (!user) {
     return;

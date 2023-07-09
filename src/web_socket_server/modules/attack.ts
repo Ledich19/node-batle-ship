@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 import { rooms } from '../../data/rooms.js';
 import { fields } from '../../data/fields.js';
-import { DAMAGE, SHIP } from '../../app/variables.js';
+import { DAMAGE, MISS, SHIP } from '../../app/variables.js';
 import { wss } from '../../index.js';
 import { checkSurroundingCells } from '../../app/healpers.js';
 import checkEnd from './checkEnd.js';
@@ -22,17 +22,16 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
   const field = fields.getById(gameId, anotherPlayer || 0);
 
   let status: 'miss' | 'killed' | 'shot' = 'miss';
-
+  
   if (field?.field && anotherPlayer && room?.currentPlayer === indexPlayer) {
+    
+
+
     const point =
-      field.field[y][x] === SHIP
-        ? DAMAGE
-        : field.field[y][x] === DAMAGE
-        ? DAMAGE
-        : field.field[y][x];
+      field.field[y][x] === SHIP ? DAMAGE : field.field[y][x] === DAMAGE ? DAMAGE : MISS;
     const result = checkSurroundingCells(field.field, x, y);
 
-    const updatedField = fields.update({ gameId, x, y, indexPlayer }, point);
+    const updatedField = fields.update({ gameId, x, y, indexPlayer: anotherPlayer }, point);
 
     if (result && point === DAMAGE) {
       status = 'shot';
@@ -40,6 +39,7 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
     if (!result && point === DAMAGE) {
       status = 'killed';
     }
+   
 
     const data = {
       position: {

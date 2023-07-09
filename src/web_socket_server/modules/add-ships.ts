@@ -25,16 +25,8 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
     }
   });
   fields.create(gameId, indexPlayer, field, ships);
-  // field.forEach((element) => {
-  //   console.log(`${element}`);
-  // });
-  console.log('ADD_SHIPS:');
-  field.forEach((element) => {
-    console.log(element.toString());
-  });
 
   if (fields.check(gameId)) {
-    const room = rooms.getById(gameId);
     const currentFields = fields.get().filter((field) => field.roomId === gameId);
     const playersId = currentFields.map((field) => field.userId);
 
