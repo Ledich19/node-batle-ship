@@ -28,6 +28,9 @@ const handleWebSocket = (ws: WebSocket & { userId: number }) => {
     if (dataParsed.type === 'attack') {      
       attack(ws, dataParsed.data)
     }
+    if (dataParsed.type === 'randomAttack') {      
+      attack(ws, dataParsed.data)
+    }
     console.log('received: %s', data);
   });
 

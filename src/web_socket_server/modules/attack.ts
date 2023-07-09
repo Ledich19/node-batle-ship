@@ -16,19 +16,32 @@ const checkSurroundingCells = (field: string[][], x: number, y: number) => {
 
 const attack = (ws: WebSocket & { userId: number }, data: string) => {
   const userId = ws.userId;
-  const { gameId, x, y, indexPlayer } = JSON.parse(data);
-  const room = rooms.getById(gameId)
+  const parsedData = JSON.parse(data);
+  const { gameId, x, y, indexPlayer } = parsedData as {
+    gameId: number;
+    x: number;
+    y: number;
+    indexPlayer: number;
+  };
+  const room = rooms.getById(gameId);
   const anotherPlayer = rooms
     .getById(gameId)
     ?.roomUsers.map((user) => user.index)
     .filter((user) => user !== indexPlayer)[0];
   const field = fields.getById(gameId, anotherPlayer || 0);
   let status: 'miss' | 'killed' | 'shot' = 'miss';
-  
-  
+
   if (field?.field && anotherPlayer && room?.currentPlayer === indexPlayer) {
-    const point = field.field[y][x] === SHIP ? DAMAGE : field.field[y][x];
+    const point =
+      field.field[y][x] === SHIP
+        ? DAMAGE
+        : field.field[y][x] === DAMAGE
+        ? DAMAGE
+        : field.field[y][x];
     const result = checkSurroundingCells(field.field, x, y);
+
+    fields.update({ gameId, x, y, indexPlayer }, point);
+
     if (result && point === DAMAGE) {
       status = 'shot';
     }
@@ -50,16 +63,15 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
       id: 0,
     };
 
-    const nextIndex = status === 'miss' ? anotherPlayer : indexPlayer
+    const nextIndex = status === 'miss' ? anotherPlayer : indexPlayer;
     const nextPlayer = {
       type: 'turn',
       data: JSON.stringify({
-        currentPlayer: nextIndex ,
+        currentPlayer: nextIndex,
       }),
       id: 0,
     };
-    rooms.setNex(nextIndex, gameId)
-
+    rooms.setNex(nextIndex, gameId);
 
     wss.clients.forEach((client) => {
       client.send(JSON.stringify(resObj));

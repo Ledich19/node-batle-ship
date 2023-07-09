@@ -31,10 +31,10 @@ const check = (roomId: number): boolean => {
 };
 
 const update = (
-  { gameID, x, y, indexPlayer }: { gameID: number; x: number; y: number; indexPlayer: number },
+  { gameId, x, y, indexPlayer }: { gameId: number; x: number; y: number; indexPlayer: number },
   sign: string
 ) => {
-  const field = fieldsData.find((field) => field.roomId === gameID && field.userId === indexPlayer);
+  const field = fieldsData.find((field) => field.roomId === gameId && field.userId === indexPlayer);
   if (field?.field) {
     field.field[y][x] = sign;
   }
