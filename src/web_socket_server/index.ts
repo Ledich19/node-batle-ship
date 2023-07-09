@@ -4,6 +4,7 @@ import createRoom from './modules/create-room.js';
 import addShips from './modules/add-ships.js';
 import addUserToRoom from './modules/add-user-to-room.js';
 import attack from './modules/attack.js';
+import randomAttack from './modules/randomAttack.js';
 
 
 
@@ -29,7 +30,7 @@ const handleWebSocket = (ws: WebSocket & { userId: number }) => {
       attack(ws, dataParsed.data)
     }
     if (dataParsed.type === 'randomAttack') {      
-      attack(ws, dataParsed.data)
+      randomAttack(ws, dataParsed.data)
     }
     console.log('received: %s', data);
   });

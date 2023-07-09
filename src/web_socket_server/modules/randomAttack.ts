@@ -2,11 +2,92 @@ import WebSocket from 'ws';
 import { users } from '../../data/users.js';
 import { rooms } from '../../data/rooms.js';
 import { wss } from '../../index.js';
+import { fields } from '../../data/fields.js';
+import { DAMAGE, SEA, SHIP } from '../../app/variables.js';
+import { log } from 'console';
+import { checkSurroundingCells } from '../../app/healpers.js';
 
 const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
   const userId = ws.userId;
-  const user = users.getById(userId);
-  const { indexRoom } = JSON.parse(data);
+  const { gameId, indexPlayer } = JSON.parse(data);
+
+  const anotherPlayer = rooms
+    .getById(gameId)
+    ?.roomUsers.map((user) => user.index)
+    .filter((user) => user !== indexPlayer)[0];
+
+  const room = rooms.getById(gameId);
+
+  const field = fields.getById(gameId, anotherPlayer || 0);
+  console.log(field);
+  
+  const fieldValue = field?.field;
+  if (!fieldValue) {
+    return;
+  }
+
+  const possibilityOfShot: { x: number; y: number }[] = [];
+  fieldValue.forEach((row, i) => {
+    row.forEach((col, j) => {
+      if (fieldValue[i][j] === SEA || fieldValue[i][j] === SHIP) {
+        possibilityOfShot.push({ x: j, y: i });
+      }
+    });
+  });
+  console.log('FIELD_VALUE:', possibilityOfShot);
+  const randomElement = possibilityOfShot[Math.floor(Math.random() * possibilityOfShot.length)];
+
+  let status: 'miss' | 'killed' | 'shot' = 'miss';
+  if (field?.field && anotherPlayer && room?.currentPlayer === indexPlayer) {
+    const point =
+      field.field[randomElement.y][randomElement.x] === SHIP
+        ? DAMAGE
+        : field.field[randomElement.y][randomElement.x] === DAMAGE
+        ? DAMAGE
+        : field.field[randomElement.y][randomElement.x];
+    const result = checkSurroundingCells(field.field, randomElement.x, randomElement.y);
+
+    fields.update({ gameId: gameId, x: randomElement.x, y: randomElement.y, indexPlayer }, point);
+
+    if (result && point === DAMAGE) {
+      status = 'shot';
+    }
+    if (!result && point === DAMAGE) {
+      status = 'killed';
+    }
+
+    const data = {
+      position: {
+        x: randomElement.x,
+        y: randomElement.y,
+      },
+      currentPlayer: indexPlayer,
+      status: status,
+    };
+    const resObj = {
+      type: 'attack',
+      data: JSON.stringify(data),
+      id: 0,
+    };
+
+    const nextIndex = status === 'miss' ? anotherPlayer : indexPlayer;
+    const nextPlayer = {
+      type: 'turn',
+      data: JSON.stringify({
+        currentPlayer: nextIndex,
+      }),
+      id: 0,
+    };
+    rooms.setNex(nextIndex, gameId);
+
+    wss.clients.forEach((client) => {
+      client.send(JSON.stringify(resObj));
+      client.send(JSON.stringify(nextPlayer));
+    });
+  }
+
+
+
 
 };
 export default randomAttack;

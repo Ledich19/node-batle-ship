@@ -1,21 +1,11 @@
 import WebSocket from 'ws';
 import { rooms } from '../../data/rooms.js';
-import { users } from '../../data/users.js';
 import { fields } from '../../data/fields.js';
-import { DAMAGE, SEA, SHIP } from '../../app/variables.js';
-import { FieldType } from '../../app/types.js';
+import { DAMAGE, SHIP } from '../../app/variables.js';
 import { wss } from '../../index.js';
-
-const checkSurroundingCells = (field: string[][], x: number, y: number) => {
-  const top = y > 0 && field[y - 1][x] === SHIP; // Ячейка сверху
-  const bottom = y < field.length - 1 && field[y + 1][x] === SHIP; // Ячейка снизу
-  const left = x > 0 && field[y][x - 1] === SHIP; // Ячейка слева
-  const right = x < field[y].length - 1 && field[y][x + 1] === SHIP; // Ячейка справа
-  return top || bottom || left || right;
-};
+import { checkSurroundingCells } from '../../app/healpers.js';
 
 const attack = (ws: WebSocket & { userId: number }, data: string) => {
-  const userId = ws.userId;
   const parsedData = JSON.parse(data);
   const { gameId, x, y, indexPlayer } = parsedData as {
     gameId: number;
@@ -29,6 +19,7 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
     ?.roomUsers.map((user) => user.index)
     .filter((user) => user !== indexPlayer)[0];
   const field = fields.getById(gameId, anotherPlayer || 0);
+  
   let status: 'miss' | 'killed' | 'shot' = 'miss';
 
   if (field?.field && anotherPlayer && room?.currentPlayer === indexPlayer) {
