@@ -44,10 +44,10 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
 
   resData.index > 0 ? (ws.userId = resData.index) : null;
   const roomsWithOnePlayer = rooms.get().filter((room) => room.roomUsers.length == 1);
-  
+
   ws.send(createResponse('reg', resData));
- 
-  const winners = users.get().map((user) => ({name: user.name, wins: user.wins}))
+
+  const winners = users.get().map((user) => ({ name: user.name, wins: user.wins }));
 
   wss.clients.forEach((client) => {
     ws.send(createResponse('update_room', roomsWithOnePlayer));

@@ -43,3 +43,12 @@ export type ShipType = {
   type: 'small' | 'medium' | 'large' | 'huge';
 };
 export type CustomWebSocket = WebSocket & { userId: number };
+
+export type AttackType =  {
+  position: {
+    x: number,
+    y: number,
+  },
+  currentPlayer: number,
+  status: StatusType,
+}

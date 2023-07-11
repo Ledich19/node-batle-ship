@@ -3,9 +3,9 @@ import { rooms } from '../../data/rooms.js';
 import { wss } from '../../index.js';
 import { fields } from '../../data/fields.js';
 import { DAMAGE, MISS, SEA, SHIP } from '../../app/variables.js';
-import { checkSurroundingCells, createResponse } from '../../app/healpers.js';
+import { checkSurroundingCells, createKilledShip, createResponse } from '../../app/healpers.js';
 import checkEnd from './checkEnd.js';
-import { StatusType } from '../../app/types.js';
+import { AttackType, StatusType } from '../../app/types.js';
 
 const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
   const { gameId, indexPlayer } = JSON.parse(data);
@@ -50,28 +50,48 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
       point
     );
 
+
+
+    let points: AttackType[] = [];
     if (result && point === DAMAGE) {
       status = 'shot';
+      points = [
+        {
+          position: {
+            x: randomElement.x,
+            y: randomElement.y,
+          },
+          currentPlayer: indexPlayer,
+          status: status,
+        }
+      ];
     }
-    if (!result && point === DAMAGE) {
+    else if (!result && point === DAMAGE) {
       status = 'killed';
+      points = createKilledShip(field.field, randomElement.x, randomElement.y, indexPlayer);
+    } else {
+      points = [
+        {
+          position: {
+            x: randomElement.x,
+            y: randomElement.y,
+          },
+          currentPlayer: indexPlayer,
+          status: status,
+        }
+      ];
     }
 
-    const data = {
-      position: {
-        x: randomElement.x,
-        y: randomElement.y,
-      },
-      currentPlayer: indexPlayer,
-      status: status,
-    };
+  
 
     const nextIndex = status === 'miss' ? anotherPlayer : indexPlayer;
 
     rooms.setNex(nextIndex, gameId);
 
     wss.clients.forEach((client) => {
-      client.send(createResponse('attack', data));
+      points.forEach((data) => {
+        client.send(createResponse('attack', data));
+      });
       client.send(createResponse('turn', { currentPlayer: nextIndex }));
     });
 

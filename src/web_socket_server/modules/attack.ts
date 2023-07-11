@@ -3,9 +3,9 @@ import { rooms } from '../../data/rooms.js';
 import { fields } from '../../data/fields.js';
 import { DAMAGE, MISS, SHIP } from '../../app/variables.js';
 import { wss } from '../../index.js';
-import { checkSurroundingCells, createResponse } from '../../app/healpers.js';
+import { checkSurroundingCells, createKilledShip, createResponse } from '../../app/healpers.js';
 import checkEnd from './checkEnd.js';
-import { StatusType } from '../../app/types.js';
+import { AttackType, StatusType } from '../../app/types.js';
 
 const attack = (ws: WebSocket & { userId: number }, data: string) => {
   const parsedData = JSON.parse(data);
@@ -31,28 +31,45 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
 
     const updatedField = fields.update({ gameId, x, y, indexPlayer: anotherPlayer }, point);
 
+    let points: AttackType[] = [];
     if (result && point === DAMAGE) {
       status = 'shot';
+      points = [
+        {
+          position: {
+            x: x,
+            y: y,
+          },
+          currentPlayer: indexPlayer,
+          status: status,
+        },
+      ];
     }
-    if (!result && point === DAMAGE) {
+    else if (!result && point === DAMAGE) {
       status = 'killed';
+      points = createKilledShip(field.field, x, y, indexPlayer);
+    } else {
+      points = [
+        {
+          position: {
+            x: x,
+            y: y,
+          },
+          currentPlayer: indexPlayer,
+          status: status,
+        },
+      ];
     }
 
-    const data = {
-      position: {
-        x: x,
-        y: y,
-      },
-      currentPlayer: indexPlayer,
-      status: status,
-    };
 
     const nextIndex = status === 'miss' ? anotherPlayer : indexPlayer;
 
     rooms.setNex(nextIndex, gameId);
 
     wss.clients.forEach((client) => {
-      client.send(createResponse('attack', data));
+      points.forEach((data) => {
+        client.send(createResponse('attack', data));
+      });
       client.send(createResponse('turn', { currentPlayer: nextIndex }));
     });
 
@@ -61,6 +78,5 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
     }
     checkEnd(ws, updatedField.field, indexPlayer);
   }
-
 };
 export default attack;
