@@ -1,35 +1,70 @@
-import { Point } from '@nut-tree/nut-js';
 import { AttackType, ResponseType } from './types.js';
 import { DAMAGE, SHIP } from './variables.js';
 
-export const checkSurroundingCells = (field: string[][], x: number, y: number) => {
-  const top = y > 0 && field[y - 1][x] === SHIP;
-  const bottom = y < field.length - 1 && field[y + 1][x] === SHIP;
-  const left = x > 0 && field[y][x - 1] === SHIP;
-  const right = x < field[y].length - 1 && field[y][x + 1] === SHIP;
+const createPoints = (field: string[][], x: number, y: number, rules: string[]) => {
+  const top = y > 0 && rules.includes(field[y - 1][x]) ? { x, y: y - 1 } : null;
+  const bottom = y < field.length - 1 && rules.includes(field[y + 1][x]) ? { x, y: y + 1 } : null;
+  const left = x > 0 && rules.includes(field[y][x - 1]) ? { x: x - 1, y } : null;
+  const right = x < field[y].length - 1 && rules.includes(field[y][x + 1]) ? { x: x + 1, y } : null;
+  return { top, bottom, left, right };
+};
 
-  return top || bottom || left || right;
+export const checkSurroundingCells = (field: string[][], x: number, y: number): boolean | null => {
+  const startX = x;
+  const startY = y;
+  const visited: boolean[][] = []; // Массив для отслеживания посещенных клеток
+
+  const recursiveCheck = (field: string[][], x: number, y: number): boolean | null => {
+    if (typeof x !== 'number' || typeof y !== 'number' || visited[y]?.[x]) {
+      return false;
+    }
+
+    visited[y] = visited[y] || [];
+    visited[y][x] = true;
+
+    const ship = field[y][x] === SHIP;
+    console.log('SHIP:', x, y, field[y][x], ship);
+    if (ship && (x !== startX || y !== startY)) {
+      console.log('YES');
+      return true;
+    }
+
+    const { top, bottom, left, right } = createPoints(field, x, y, [DAMAGE, SHIP]);
+    console.log('TBLR', top, bottom, left, right);
+
+    const hasShipTop = top && recursiveCheck(field, top.x, top.y);
+    const hasShipBottom = bottom && recursiveCheck(field, bottom.x, bottom.y);
+    const hasShipLeft = left && recursiveCheck(field, left.x, left.y);
+    const hasShipRight = right && recursiveCheck(field, right.x, right.y);
+
+    return hasShipTop || hasShipBottom || hasShipLeft || hasShipRight;
+  };
+
+  const result = recursiveCheck(field, x, y);
+  console.log('RESULT:', result);
+  return result;
 };
 
 export const findDAmageShip = (field: string[][], x: number, y: number, points: AttackType[]) => {
-  const top = y > 0 && field[y - 1][x] === DAMAGE;
-  const bottom = y < field.length - 1 && field[y + 1][x] === DAMAGE;
-  const left = x > 0 && field[y][x - 1] === DAMAGE;
-  const right = x < field[y].length - 1 && field[y][x + 1] === DAMAGE;
-  console.log(x, y);
-  console.log(top, bottom, left, right);
+  const { top, bottom, left, right } = createPoints(field, x, y, [DAMAGE]);
 
-  if (top && !points.find((point) => point.position.x === x && point.position.y === y - 1)) {
-    return { x, y: y - 1 };
+  if (top && !points.find((point) => point.position.x === top.x && point.position.y === top.y)) {
+    return { x: top.x, y: top.y };
   }
-  if (bottom && !points.find((point) => point.position.x === x && point.position.y === y + 1)) {
-    return { x, y: y + 1 };
+  if (
+    bottom &&
+    !points.find((point) => point.position.x === bottom.x && point.position.y === bottom.y)
+  ) {
+    return { x: bottom.x, y: bottom.y };
   }
-  if (left && !points.find((point) => point.position.x === x - 1 && point.position.y === y)) {
-    return { x: x - 1, y };
+  if (left && !points.find((point) => point.position.x === left.x && point.position.y === left.y)) {
+    return { x: left.x, y: left.y };
   }
-  if (right && !points.find((point) => point.position.x === x + 1 && point.position.y === y)) {
-    return { x: x + 1, y };
+  if (
+    right &&
+    !points.find((point) => point.position.x === right.x && point.position.y === right.y)
+  ) {
+    return { x: right.x, y: right.y };
   }
 
   return null;
@@ -130,11 +165,7 @@ export const createKilledShip = (
       });
     }
 
-    if (
-      pointY > 0 &&
-      pointX > 0 &&
-      field[topLeftPoint.y][topLeftPoint.x] !== DAMAGE
-    ) {
+    if (pointY > 0 && pointX > 0 && field[topLeftPoint.y][topLeftPoint.x] !== DAMAGE) {
       points.push({
         position: {
           x: pointX - 1,
@@ -192,9 +223,7 @@ export const createKilledShip = (
   }
   const uniquePoints = points.filter((value, index, self) => {
     const { x, y } = value.position;
-    return (
-      self.findIndex((p) => p.position.x === x && p.position.y === y) === index
-    );
+    return self.findIndex((p) => p.position.x === x && p.position.y === y) === index;
   });
 
   return uniquePoints;

@@ -28,6 +28,7 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
     const point =
       field.field[y][x] === SHIP ? DAMAGE : field.field[y][x] === DAMAGE ? DAMAGE : MISS;
     const result = checkSurroundingCells(field.field, x, y);
+console.log('checkSurroundingCells:::::', result);
 
     const updatedField = fields.update({ gameId, x, y, indexPlayer: anotherPlayer }, point);
 
