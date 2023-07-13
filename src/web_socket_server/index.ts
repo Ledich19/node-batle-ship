@@ -6,6 +6,7 @@ import addUserToRoom from './modules/add-user-to-room.js';
 import attack from './modules/attack.js';
 import randomAttack from './modules/randomAttack.js';
 import { CustomWebSocket } from '../app/types.js';
+import singlePlay from './modules/singlePlay.js';
 
 
 
@@ -33,6 +34,9 @@ const handleWebSocket = (ws: WebSocket & { userId: number }) => {
     }
     if (dataParsed.type === 'randomAttack') {      
       randomAttack(customWs, dataParsed.data)
+    }
+    if (dataParsed.type === 'single_play') {      
+      singlePlay(customWs, dataParsed.data)
     }
     console.log('received: %s', data);
   });

@@ -27,6 +27,7 @@ export type FieldType = {
 export type RoomType = {
   currentPlayer: number;
   roomId: number;
+  isSingle?: boolean;
   roomUsers: {name: string, index: number}[],
 
     roomSockets: CustomWebSocket[];

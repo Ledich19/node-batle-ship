@@ -26,6 +26,7 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
     resData.errorText = 'password minimum 5 characters';
   }
 
+
   if (user && user.password === password) {
     resData.name = user.name;
     resData.index = user.id;
