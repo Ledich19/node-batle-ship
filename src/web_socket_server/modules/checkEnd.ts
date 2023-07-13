@@ -1,16 +1,10 @@
-import WebSocket from 'ws';
 import { DAMAGE } from '../../app/variables.js';
 import { wss } from '../../index.js';
 import { users } from '../../data/users.js';
 import { createResponse } from '../../app/healpers.js';
+import { CustomWebSocket } from '../../app/types.js';
 
-const checkEnd = (ws: WebSocket & { userId: number }, field: string[][], player: number) => {
-  console.log('CHECK: ', player);
-  console.log('ADD_SHIPS:');
-  field.forEach((element) => {
-    console.log(element.toString());
-  });
-
+const checkEnd = (ws: CustomWebSocket, field: string[][], player: number) => {
   if (!field) {
     return;
   }
@@ -22,14 +16,16 @@ const checkEnd = (ws: WebSocket & { userId: number }, field: string[][], player:
     return total;
   }, 0);
 
-  const winners = users.get().map((user) => ({name: user.name, wins: user.wins}))
+  users.setWinner(player);
+  const winners = users.get().map((user) => ({ name: user.name, wins: user.wins }));
 
   if (damagePoints === 20) {
+    ws.room.roomSockets.forEach((socket) => {
+      socket.send(createResponse('finish', { winPlayer: player }));
+    });
     wss.clients.forEach((client) => {
-      client.send(createResponse('finish', { winPlayer: player }));
       client.send(createResponse('update_winners', winners));
     });
   }
-  users.setWinner(player);
 };
 export default checkEnd;

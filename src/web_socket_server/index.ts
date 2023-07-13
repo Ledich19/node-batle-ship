@@ -5,6 +5,7 @@ import addShips from './modules/add-ships.js';
 import addUserToRoom from './modules/add-user-to-room.js';
 import attack from './modules/attack.js';
 import randomAttack from './modules/randomAttack.js';
+import { CustomWebSocket } from '../app/types.js';
 
 
 
@@ -13,24 +14,25 @@ const handleWebSocket = (ws: WebSocket & { userId: number }) => {
   ws.on('message', (data: string) => {
     const dataParsed = JSON.parse(data);
     console.log('TYPE:', dataParsed.type);
+    const customWs = ws as CustomWebSocket
     
     if (dataParsed.type === 'reg') {
      reg(ws, dataParsed.data)
     }
     if (dataParsed.type === 'create_room') {
-      createRoom(ws)
+      createRoom(customWs)
     }
     if (dataParsed.type === 'add_ships') {      
-      addShips(ws, dataParsed.data)
+      addShips(customWs, dataParsed.data)
     }
     if (dataParsed.type === 'add_user_to_room') {      
-      addUserToRoom(ws, dataParsed.data)
+      addUserToRoom(customWs, dataParsed.data)
     }
     if (dataParsed.type === 'attack') {      
-      attack(ws, dataParsed.data)
+      attack(customWs, dataParsed.data)
     }
     if (dataParsed.type === 'randomAttack') {      
-      randomAttack(ws, dataParsed.data)
+      randomAttack(customWs, dataParsed.data)
     }
     console.log('received: %s', data);
   });

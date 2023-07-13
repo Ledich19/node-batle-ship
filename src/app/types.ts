@@ -27,10 +27,15 @@ export type FieldType = {
 export type RoomType = {
   currentPlayer: number;
   roomId: number;
-  roomUsers: {
-    name: string;
-    index: number;
-  }[];
+  roomUsers: {name: string, index: number}[],
+
+    roomSockets: CustomWebSocket[];
+  fields: {
+    [key: string]: string[][] | null
+  };
+  ships: {
+    [key: string]: [] | null
+  };
 };
 
 export type ShipType = {
@@ -42,7 +47,7 @@ export type ShipType = {
   length: number;
   type: 'small' | 'medium' | 'large' | 'huge';
 };
-export type CustomWebSocket = WebSocket & { userId: number };
+export type CustomWebSocket = WebSocket & { userId: number, room: RoomType };
 
 export type AttackType =  {
   position: {

@@ -1,13 +1,11 @@
-import WebSocket from 'ws';
-import { rooms } from '../../data/rooms.js';
-import { fields } from '../../data/fields.js';
 import { DAMAGE, MISS, SHIP } from '../../app/variables.js';
-import { wss } from '../../index.js';
-import { checkSurroundingCells, createKilledShip, createResponse } from '../../app/healpers.js';
-import checkEnd from './checkEnd.js';
-import { AttackType, StatusType } from '../../app/types.js';
 
-const attack = (ws: WebSocket & { userId: number }, data: string) => {
+import { checkIsAliveShip, createKilledShip, createResponse } from '../../app/healpers.js';
+import checkEnd from './checkEnd.js';
+import { AttackType, CustomWebSocket, StatusType } from '../../app/types.js';
+import { rooms } from '../../data/rooms.js';
+
+const attack = (ws: CustomWebSocket, data: string) => {
   const parsedData = JSON.parse(data);
   const { gameId, x, y, indexPlayer } = parsedData as {
     gameId: number;
@@ -16,24 +14,25 @@ const attack = (ws: WebSocket & { userId: number }, data: string) => {
     indexPlayer: number;
   };
   const room = rooms.getById(gameId);
-  const anotherPlayer = rooms
-    .getById(gameId)
-    ?.roomUsers.map((user) => user.index)
+  if (!room) {
+    return
+  }
+  const anotherPlayer = room.roomUsers
+    .map((user) => user.index)
     .filter((user) => user !== indexPlayer)[0];
-  const field = fields.getById(gameId, anotherPlayer || 0);
+  const field = room.fields[anotherPlayer];
 
   let status: StatusType = 'miss';
 
-  if (field?.field && anotherPlayer && room?.currentPlayer === indexPlayer) {
-    const point =
-      field.field[y][x] === SHIP ? DAMAGE : field.field[y][x] === DAMAGE ? DAMAGE : MISS;
-    const result = checkSurroundingCells(field.field, x, y);
-console.log('checkSurroundingCells:::::', result);
+  if (field && anotherPlayer && room.currentPlayer === indexPlayer) {
+    const point = field[y][x] === SHIP ? DAMAGE : field[y][x] === DAMAGE ? DAMAGE : MISS;
+    const isAlive = checkIsAliveShip(field, x, y);
 
-    const updatedField = fields.update({ gameId, x, y, indexPlayer: anotherPlayer }, point);
+    field[y][x] = point;
 
     let points: AttackType[] = [];
-    if (result && point === DAMAGE) {
+
+    if (isAlive && point === DAMAGE) {
       status = 'shot';
       points = [
         {
@@ -45,10 +44,9 @@ console.log('checkSurroundingCells:::::', result);
           status: status,
         },
       ];
-    }
-    else if (!result && point === DAMAGE) {
+    } else if (!isAlive && point === DAMAGE) {
       status = 'killed';
-      points = createKilledShip(field.field, x, y, indexPlayer);
+      points = createKilledShip(field, x, y, indexPlayer);
     } else {
       points = [
         {
@@ -62,22 +60,16 @@ console.log('checkSurroundingCells:::::', result);
       ];
     }
 
+    ws.room.currentPlayer = status === 'miss' ? anotherPlayer : indexPlayer;
 
-    const nextIndex = status === 'miss' ? anotherPlayer : indexPlayer;
-
-    rooms.setNex(nextIndex, gameId);
-
-    wss.clients.forEach((client) => {
+    ws.room.roomSockets.forEach((socket) => {
       points.forEach((data) => {
-        client.send(createResponse('attack', data));
+        socket.send(createResponse('attack', data));
       });
-      client.send(createResponse('turn', { currentPlayer: nextIndex }));
+      socket.send(createResponse('turn', { currentPlayer: ws.room.currentPlayer }));
     });
 
-    if (!updatedField?.field) {
-      return;
-    }
-    checkEnd(ws, updatedField.field, indexPlayer);
+    checkEnd(ws, field, indexPlayer);
   }
 };
 export default attack;

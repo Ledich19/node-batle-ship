@@ -1,31 +1,29 @@
-import WebSocket from 'ws';
 import { users } from '../../data/users.js';
 import { rooms } from '../../data/rooms.js';
-import { wss } from '../../index.js';
 import { createResponse } from '../../app/healpers.js';
+import { CustomWebSocket } from '../../app/types.js';
 
-type CustomWebSocket = WebSocket & { userId: number };
-
-const addUserToRoom = (ws: WebSocket & { userId: number }, data: string) => {
+const addUserToRoom = (ws: CustomWebSocket, data: string) => {
   const userId = ws.userId;
   const user = users.getById(userId);
   const { indexRoom } = JSON.parse(data);
+  
   if (user) {
-    const room = rooms.add({ name: user.name, index: user.id }, indexRoom);
-    const playersId = room?.roomUsers.map((user) => user.index);
+    const room = rooms.getById(indexRoom);
+    room?.roomSockets.push(ws);
+    room?.roomUsers.push({ name: user.name, index: userId })
+    if(!room) return
+    ws.room = room;
 
-
-    wss.clients.forEach((client) => {
-      const customClient = client as CustomWebSocket;
-      if (client.readyState === WebSocket.OPEN && playersId?.includes(customClient.userId)) {
-
-        const resData = {
-          idGame: room?.roomId,
-          idPlayer: customClient.userId,
-        }
-        client.send(createResponse('create_game', resData));
-      }
+    room?.roomSockets.forEach((user) => {
+      const resData = {
+        idGame: room?.roomId,
+        idPlayer: user.userId,
+      };
+      user.send(createResponse('create_game', resData));
     });
+
+
   }
 };
 export default addUserToRoom;

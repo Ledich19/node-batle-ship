@@ -1,15 +1,16 @@
-import WebSocket from 'ws';
 import { CustomWebSocket, ShipType } from '../../app/types.js';
-import { fields } from '../../data/fields.js';
-import { rooms } from '../../data/rooms.js';
-import { wss } from '../../index.js';
+
 import { SEA, SHIP } from '../../app/variables.js';
 import { createResponse } from '../../app/healpers.js';
+import { rooms } from '../../data/rooms.js';
 
-const addShips = (ws: WebSocket & { userId: number }, data: string) => {
+const addShips = (ws: CustomWebSocket, data: string) => {
   const FiELD_SIZE = 10;
-
   const { gameId, ships, indexPlayer } = JSON.parse(data);
+  const room = rooms.getById(gameId);
+  if (!room) {
+    return
+  }
 
   const field = Array(FiELD_SIZE)
     .fill(SEA)
@@ -25,39 +26,24 @@ const addShips = (ws: WebSocket & { userId: number }, data: string) => {
       }
     }
   });
-  fields.create(gameId, indexPlayer, field, ships);
+  room.fields[indexPlayer] = field;
+  room.ships[indexPlayer] = ships;
 
-  if (fields.check(gameId)) {
-    const currentFields = fields.get().filter((field) => field.roomId === gameId);
-    const playersId = currentFields.map((field) => field.userId);
+  if (room.roomUsers.every((user) => room.fields[user.index])) {
+    const playersId = room.roomUsers.map((user) => user.index);
+    console.log('playersId ', playersId);
 
-    const currentPlayer = playersId[Math.round(Math.random())];
+    room.currentPlayer = playersId[Math.round(Math.random())];
 
-    rooms.setNex(currentPlayer, gameId);
-
-    const messages = currentFields.map((field) => {
+    room.roomSockets.forEach((socket) => {
       const data = {
-        ships: field.ships,
-        currentPlayerIndex: field.userId,
+        ships: room.ships[socket.userId],
+        currentPlayerIndex: room.currentPlayer,
       };
-      const obg = createResponse('start_game', data)
 
-      return { data: obg, id: field.userId };
-    });
+      socket.send(createResponse('start_game', data));
 
-    wss.clients.forEach((client) => {
-      const customClient = client as CustomWebSocket;
-      if (client.readyState === WebSocket.OPEN && playersId?.includes(customClient.userId)) {
-        messages.forEach((message) => {
-          if (customClient.userId === message.id) {
-
-            client.send(message.data);
-
-          }
-        });
-
-        client.send(createResponse('turn', { currentPlayer }));
-      }
+      socket.send(createResponse('turn', { currentPlayer: room.currentPlayer }));
     });
   }
 };

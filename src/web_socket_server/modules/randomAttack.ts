@@ -1,33 +1,28 @@
-import WebSocket from 'ws';
-import { rooms } from '../../data/rooms.js';
-import { wss } from '../../index.js';
-import { fields } from '../../data/fields.js';
 import { DAMAGE, MISS, SEA, SHIP } from '../../app/variables.js';
-import { checkSurroundingCells, createKilledShip, createResponse } from '../../app/healpers.js';
+import { checkIsAliveShip, createKilledShip, createResponse } from '../../app/healpers.js';
 import checkEnd from './checkEnd.js';
-import { AttackType, StatusType } from '../../app/types.js';
+import { AttackType, CustomWebSocket, StatusType } from '../../app/types.js';
+import { rooms } from '../../data/rooms.js';
 
-const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
+const randomAttack = (ws: CustomWebSocket, data: string) => {
   const { gameId, indexPlayer } = JSON.parse(data);
-
-  const anotherPlayer = rooms
-    .getById(gameId)
-    ?.roomUsers.map((user) => user.index)
-    .filter((user) => user !== indexPlayer)[0];
-
   const room = rooms.getById(gameId);
+  if (!room) {
+    return
+  }
+  const anotherPlayer = room.roomUsers
+    .map((user) => user.index)
+    .filter((user) => user !== indexPlayer)[0];
+  const field = room.fields[anotherPlayer];
 
-  const field = fields.getById(gameId, anotherPlayer || 0);
-
-  const fieldValue = field?.field;
-  if (!fieldValue) {
+  if (!field) {
     return;
   }
 
   const possibilityOfShot: { x: number; y: number }[] = [];
-  fieldValue.forEach((row, i) => {
+  field.forEach((row, i) => {
     row.forEach((col, j) => {
-      if (fieldValue[i][j] === SEA || fieldValue[i][j] === SHIP) {
+      if (field[i][j] === SEA || field[i][j] === SHIP) {
         possibilityOfShot.push({ x: j, y: i });
       }
     });
@@ -35,25 +30,20 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
   const randomElement = possibilityOfShot[Math.floor(Math.random() * possibilityOfShot.length)];
 
   let status: StatusType = 'miss';
-  if (field?.field && anotherPlayer && room?.currentPlayer === indexPlayer) {
+  if (field && anotherPlayer && room?.currentPlayer === indexPlayer) {
     const point =
-      field.field[randomElement.y][randomElement.x] === SHIP
+      field[randomElement.y][randomElement.x] === SHIP
         ? DAMAGE
-        : field.field[randomElement.y][randomElement.x] === DAMAGE
+        : field[randomElement.y][randomElement.x] === DAMAGE
         ? DAMAGE
         : MISS;
 
-    const result = checkSurroundingCells(field.field, randomElement.x, randomElement.y);
+    const isAlive = checkIsAliveShip(field, randomElement.x, randomElement.y);
 
-    const updatedField = fields.update(
-      { gameId: gameId, x: randomElement.x, y: randomElement.y, indexPlayer: anotherPlayer },
-      point
-    );
-
-
+    field[randomElement.y][randomElement.x] = point;
 
     let points: AttackType[] = [];
-    if (result && point === DAMAGE) {
+    if (isAlive && point === DAMAGE) {
       status = 'shot';
       points = [
         {
@@ -63,12 +53,11 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
           },
           currentPlayer: indexPlayer,
           status: status,
-        }
+        },
       ];
-    }
-    else if (!result && point === DAMAGE) {
+    } else if (!isAlive && point === DAMAGE) {
       status = 'killed';
-      points = createKilledShip(field.field, randomElement.x, randomElement.y, indexPlayer);
+      points = createKilledShip(field, randomElement.x, randomElement.y, indexPlayer);
     } else {
       points = [
         {
@@ -78,27 +67,20 @@ const randomAttack = (ws: WebSocket & { userId: number }, data: string) => {
           },
           currentPlayer: indexPlayer,
           status: status,
-        }
+        },
       ];
     }
 
-  
+    ws.room.currentPlayer = status === 'miss' ? anotherPlayer : indexPlayer;
 
-    const nextIndex = status === 'miss' ? anotherPlayer : indexPlayer;
-
-    rooms.setNex(nextIndex, gameId);
-
-    wss.clients.forEach((client) => {
+    ws.room.roomSockets.forEach((socket) => {
       points.forEach((data) => {
-        client.send(createResponse('attack', data));
+        socket.send(createResponse('attack', data));
       });
-      client.send(createResponse('turn', { currentPlayer: nextIndex }));
+      socket.send(createResponse('turn', { currentPlayer: ws.room.currentPlayer }));
     });
 
-    if (!updatedField?.field) {
-      return;
-    }
-    checkEnd(ws, updatedField.field, indexPlayer);
+    checkEnd(ws, field, indexPlayer);
   }
 };
 export default randomAttack;

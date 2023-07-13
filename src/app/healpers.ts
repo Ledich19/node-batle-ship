@@ -9,7 +9,7 @@ const createPoints = (field: string[][], x: number, y: number, rules: string[]) 
   return { top, bottom, left, right };
 };
 
-export const checkSurroundingCells = (field: string[][], x: number, y: number): boolean | null => {
+export const checkIsAliveShip = (field: string[][], x: number, y: number): boolean | null => {
   const startX = x;
   const startY = y;
   const visited: boolean[][] = []; // Массив для отслеживания посещенных клеток

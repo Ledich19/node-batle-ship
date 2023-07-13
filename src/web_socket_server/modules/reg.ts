@@ -43,7 +43,10 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
   }
 
   resData.index > 0 ? (ws.userId = resData.index) : null;
-  const roomsWithOnePlayer = rooms.get().filter((room) => room.roomUsers.length == 1);
+  
+  const roomsWithOnePlayer = rooms.get()
+    .filter((room) => room.roomUsers.length == 1)
+    .map((room) => ({ roomId: room.roomId, roomUsers: room.roomUsers }));
 
   ws.send(createResponse('reg', resData));
 
@@ -53,5 +56,6 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
     ws.send(createResponse('update_room', roomsWithOnePlayer));
     client.send(createResponse('update_winners', winners));
   });
+
 };
 export default reg;
