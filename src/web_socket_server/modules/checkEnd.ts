@@ -16,10 +16,10 @@ const checkEnd = (ws: CustomWebSocket, field: string[][], player: number) => {
     return total;
   }, 0);
 
-  users.setWinner(player);
-  const winners = users.get().map((user) => ({ name: user.name, wins: user.wins }));
-
+  
   if (damagePoints === 20) {
+    users.setWinner(player);
+    const winners = users.get().map((user) => ({ name: user.name, wins: user.wins }));
     ws.room.roomSockets.forEach((socket) => {
       socket.send(createResponse('finish', { winPlayer: player }));
     });
