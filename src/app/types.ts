@@ -1,5 +1,6 @@
 import WebSocket from "ws";
 export type StatusType = 'miss' | 'killed' | 'shot'
+export type SizeType = 'small' | 'medium' | 'large' | 'huge'
 export type ResponseType =
   | 'reg'
   | 'turn'
@@ -46,8 +47,10 @@ export type ShipType = {
   };
   direction: boolean;
   length: number;
-  type: 'small' | 'medium' | 'large' | 'huge';
+  type: SizeType;
 };
+
+
 export type CustomWebSocket = WebSocket & { userId: number, room: RoomType };
 
 export type AttackType =  {
