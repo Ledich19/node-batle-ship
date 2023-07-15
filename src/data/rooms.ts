@@ -1,6 +1,6 @@
 import { RoomType } from '../app/types.js';
 
-const roomsData: RoomType[] = [
+let roomsData: RoomType[] = [
 ];
 
 export const createId = (): number => {
@@ -17,6 +17,9 @@ export const create = (room: RoomType): RoomType[] => {
   roomsData.push(room);
   return roomsData;
 };
+export const remove = (id: number)=> {
+  roomsData = roomsData.filter((room) => room.roomId !== id)
+};
 
 
 export const rooms = {
@@ -24,6 +27,6 @@ export const rooms = {
   get,
   getById,
   create,
-
+  remove ,
 };
 

@@ -1,9 +1,8 @@
-import { BOT_ID, DAMAGE, MISS, SEA, SHIP } from '../../app/variables.js';
+import { BOT_ID, DAMAGE, MISS, SHIP, TIME_INTERVAL } from '../../app/variables.js';
 
-import { checkIsAliveShip, createKilledShip, createResponse } from '../../app/healpers.js';
+import { checkIsAliveShip, checkShoutResult, createKilledShip, createResponse, getRandomCeil } from '../../app/healpers.js';
 import checkEnd from './checkEnd.js';
-import { AttackType, CustomWebSocket, FieldType, StatusType } from '../../app/types.js';
-import { rooms } from '../../data/rooms.js';
+import { AttackType, CustomWebSocket } from '../../app/types.js';
 
 const botAttack = (ws: CustomWebSocket) => {
   let isBotAction = true;
@@ -12,41 +11,21 @@ const botAttack = (ws: CustomWebSocket) => {
 
   if (!field || ws.room.currentPlayer !== BOT_ID) return;
 
-  const getRandomCeil = (field: string[][]) => {
-    const possibilityOfShot: { x: number; y: number }[] = [];
-    field.forEach((row, i) => {
-      row.forEach((col, j) => {
-        if (field[i][j] === SEA || field[i][j] === SHIP) {
-          possibilityOfShot.push({ x: j, y: i });
-        }
-      });
-    });
-    return possibilityOfShot[Math.floor(Math.random() * possibilityOfShot.length)];
-  };
 
   while (isBotAction) {
     const randomElement = getRandomCeil(field);
-    //let status: StatusType = 'miss';
 
-    const point =
-      field[randomElement.y][randomElement.x] === SHIP
-        ? DAMAGE
-        : field[randomElement.y][randomElement.x] === DAMAGE
-        ? DAMAGE
-        : MISS;
-    console.log('POINT:::', point);
-
+    const point = checkShoutResult(field, randomElement )
     field[randomElement.y][randomElement.x] = point;
 
     if (point === MISS) {
-      console.log('STATUS:::', 'miss');
       isBotAction = false;
       points.push({
         position: {
           x: randomElement.x,
           y: randomElement.y,
         },
-        currentPlayer: BOT_ID /* id of the player in the current game */,
+        currentPlayer: BOT_ID,
         status: 'miss',
       });
     }
@@ -62,20 +41,13 @@ const botAttack = (ws: CustomWebSocket) => {
             x: randomElement.x,
             y: randomElement.y,
           },
-          currentPlayer: BOT_ID /* id of the player in the current game */,
+          currentPlayer: BOT_ID,
           status: 'shot',
         });
       }
     }
     checkEnd(ws, field, BOT_ID);
-    // if (!isAlive && point === DAMAGE) {
-    //   status = 'killed';
-    //   points = createKilledShip(field, x, y, indexPlayer);
-    // }
   }
-
-  
-console.log('Attak bot:::: ', points);
 
   ws.room.roomSockets.forEach((socket) => {
     let point = 0;
@@ -88,13 +60,8 @@ console.log('Attak bot:::: ', points);
         socket.send(createResponse('turn', { currentPlayer: ws.userId }));
         ws.room.currentPlayer = ws.userId;
       }
-    }, 2000);
+    }, TIME_INTERVAL);
   });
-
-  //   points.forEach((data) => {
-  //     socket.send(createResponse('attack', data));
-  //   });
-  //  socket.send(createResponse('turn', { currentPlayer: ws.userId }));
 };
 
 export default botAttack;

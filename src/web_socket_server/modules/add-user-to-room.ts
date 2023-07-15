@@ -14,7 +14,6 @@ const addUserToRoom = (ws: CustomWebSocket, data: string) => {
     room?.roomUsers.push({ name: user.name, index: userId })
     if(!room) return
     ws.room = room;
-
     room?.roomSockets.forEach((user) => {
       const resData = {
         idGame: room?.roomId,
@@ -22,8 +21,6 @@ const addUserToRoom = (ws: CustomWebSocket, data: string) => {
       };
       user.send(createResponse('create_game', resData));
     });
-
-
   }
 };
 export default addUserToRoom;

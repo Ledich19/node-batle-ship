@@ -8,8 +8,6 @@ import randomAttack from './modules/randomAttack.js';
 import { CustomWebSocket } from '../app/types.js';
 import singlePlay from './modules/singlePlay.js';
 
-
-
 const handleWebSocket = (ws: WebSocket & { userId: number }) => {
   ws.on('error', console.error);
   ws.on('message', (data: string) => {

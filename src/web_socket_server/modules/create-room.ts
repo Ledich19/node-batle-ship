@@ -1,4 +1,3 @@
-import WebSocket from 'ws';
 import { rooms } from '../../data/rooms.js';
 import { users } from '../../data/users.js';
 import { wss } from '../../index.js';

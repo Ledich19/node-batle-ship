@@ -11,8 +11,5 @@ wss.on('connection', handleWebSocket);
 server.on('upgrade', function upgrade() {
   console.log('--- upgrade:');
 });
-// server.on('upgrade', function upgrade(request, socket, head) {
-//   console.log('--- upgrade:');
-// });
 
 

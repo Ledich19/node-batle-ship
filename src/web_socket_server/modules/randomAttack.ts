@@ -1,5 +1,11 @@
-import { DAMAGE, MISS, SEA, SHIP } from '../../app/variables.js';
-import { checkIsAliveShip, createKilledShip, createResponse } from '../../app/healpers.js';
+import { DAMAGE, MISS, SHIP } from '../../app/variables.js';
+import {
+  checkIsAliveShip,
+  checkShoutResult,
+  createKilledShip,
+  createResponse,
+  getRandomCeil,
+} from '../../app/healpers.js';
 import checkEnd from './checkEnd.js';
 import { AttackType, CustomWebSocket, StatusType } from '../../app/types.js';
 import { rooms } from '../../data/rooms.js';
@@ -8,7 +14,7 @@ const randomAttack = (ws: CustomWebSocket, data: string) => {
   const { gameId, indexPlayer } = JSON.parse(data);
   const room = rooms.getById(gameId);
   if (!room) {
-    return
+    return;
   }
   const anotherPlayer = room.roomUsers
     .map((user) => user.index)
@@ -19,28 +25,14 @@ const randomAttack = (ws: CustomWebSocket, data: string) => {
     return;
   }
 
-  const possibilityOfShot: { x: number; y: number }[] = [];
-  field.forEach((row, i) => {
-    row.forEach((col, j) => {
-      if (field[i][j] === SEA || field[i][j] === SHIP) {
-        possibilityOfShot.push({ x: j, y: i });
-      }
-    });
-  });
-  const randomElement = possibilityOfShot[Math.floor(Math.random() * possibilityOfShot.length)];
+  const randomElement = getRandomCeil(field);
 
   let status: StatusType = 'miss';
   if (field && anotherPlayer && room?.currentPlayer === indexPlayer) {
-    const point =
-      field[randomElement.y][randomElement.x] === SHIP
-        ? DAMAGE
-        : field[randomElement.y][randomElement.x] === DAMAGE
-        ? DAMAGE
-        : MISS;
-
+    const point = checkShoutResult(field, randomElement)
+  
     field[randomElement.y][randomElement.x] = point;
     const isAlive = checkIsAliveShip(field, randomElement.x, randomElement.y);
-
 
     let points: AttackType[] = [];
     if (isAlive && point === DAMAGE) {

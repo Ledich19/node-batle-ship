@@ -1,3 +1,4 @@
+export type CustomWebSocket = WebSocket & { userId: number, room: RoomType };
 import WebSocket from "ws";
 export type StatusType = 'miss' | 'killed' | 'shot'
 export type SizeType = 'small' | 'medium' | 'large' | 'huge'
@@ -11,6 +12,8 @@ export type ResponseType =
   | 'attack'
   | 'finish';
 
+  export type PositionXY = { x: number; y: number }
+  export type Field = string[][]
 
 export type UserType = {
   id: number;
@@ -18,19 +21,13 @@ export type UserType = {
   password: string;
   wins: number;
 };
-export type FieldType = {
-  roomId: number;
-  userId: number;
-  field: string[][] | null;
-  ships: []
-};
+
 
 export type RoomType = {
   currentPlayer: number;
   roomId: number;
   isSingle?: boolean;
   roomUsers: {name: string, index: number}[],
-
     roomSockets: CustomWebSocket[];
   fields: {
     [key: string]: string[][] | null
@@ -41,23 +38,14 @@ export type RoomType = {
 };
 
 export type ShipType = {
-  position: {
-    x: number;
-    y: number;
-  };
+  position: PositionXY;
   direction: boolean;
   length: number;
   type: SizeType;
 };
 
-
-export type CustomWebSocket = WebSocket & { userId: number, room: RoomType };
-
 export type AttackType =  {
-  position: {
-    x: number,
-    y: number,
-  },
+  position: PositionXY,
   currentPlayer: number,
   status: StatusType,
 }

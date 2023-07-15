@@ -1,7 +1,7 @@
-import { AttackType, ResponseType } from './types.js';
-import { DAMAGE, SHIP } from './variables.js';
+import { AttackType, Field, PositionXY, ResponseType } from './types.js';
+import { DAMAGE, MISS, SEA, SHIP } from './variables.js';
 
-const createPoints = (field: string[][], x: number, y: number, rules: string[]) => {
+const createPoints = (field: Field, x: number, y: number, rules: string[]) => {
   const top = y > 0 && rules.includes(field[y - 1][x]) ? { x, y: y - 1 } : null;
   const bottom = y < field.length - 1 && rules.includes(field[y + 1][x]) ? { x, y: y + 1 } : null;
   const left = x > 0 && rules.includes(field[y][x - 1]) ? { x: x - 1, y } : null;
@@ -9,12 +9,12 @@ const createPoints = (field: string[][], x: number, y: number, rules: string[]) 
   return { top, bottom, left, right };
 };
 
-export const checkIsAliveShip = (field: string[][], x: number, y: number): boolean | null => {
+export const checkIsAliveShip = (field: Field, x: number, y: number): boolean | null => {
   const startX = x;
   const startY = y;
   const visited: boolean[][] = []; // Массив для отслеживания посещенных клеток
 
-  const recursiveCheck = (field: string[][], x: number, y: number): boolean | null => {
+  const recursiveCheck = (field: Field, x: number, y: number): boolean | null => {
     if (typeof x !== 'number' || typeof y !== 'number' || visited[y]?.[x]) {
       return false;
     }
@@ -23,14 +23,12 @@ export const checkIsAliveShip = (field: string[][], x: number, y: number): boole
     visited[y][x] = true;
 
     const ship = field[y][x] === SHIP;
-  
+
     if (ship && (x !== startX || y !== startY)) {
-  
       return true;
     }
 
     const { top, bottom, left, right } = createPoints(field, x, y, [DAMAGE, SHIP]);
-    
 
     const hasShipTop = top && recursiveCheck(field, top.x, top.y);
     const hasShipBottom = bottom && recursiveCheck(field, bottom.x, bottom.y);
@@ -41,11 +39,11 @@ export const checkIsAliveShip = (field: string[][], x: number, y: number): boole
   };
 
   const result = recursiveCheck(field, x, y);
-  
+
   return result;
 };
 
-export const findDAmageShip = (field: string[][], x: number, y: number, points: AttackType[]) => {
+export const findDAmageShip = (field: Field, x: number, y: number, points: AttackType[]) => {
   const { top, bottom, left, right } = createPoints(field, x, y, [DAMAGE]);
 
   if (top && !points.find((point) => point.position.x === top.x && point.position.y === top.y)) {
@@ -80,16 +78,13 @@ export const createResponse = <T>(type: ResponseType, data: T): string => {
 };
 
 export const createKilledShip = (
-  field: string[][],
+  field: Field,
   x: number,
   y: number,
   currentPlayer: number
 ): AttackType[] => {
   const points: AttackType[] = [];
-  let point: {
-    x: number;
-    y: number;
-  } | null = {
+  let point: PositionXY | null = {
     x: x,
     y: y,
   };
@@ -227,4 +222,26 @@ export const createKilledShip = (
   });
 
   return uniquePoints;
+};
+
+export const getRandomCeil = (field: Field) => {
+  const possibilityOfShot: PositionXY[] = [];
+  field.forEach((row, i) => {
+    row.forEach((col, j) => {
+      if (field[i][j] === SEA || field[i][j] === SHIP) {
+        possibilityOfShot.push({ x: j, y: i });
+      }
+    });
+  });
+  return possibilityOfShot[Math.floor(Math.random() * possibilityOfShot.length)];
+};
+
+export const checkShoutResult = (field: Field, position: PositionXY) => {
+  const point =
+    field[position.y][position.x] === SHIP
+      ? DAMAGE
+      : field[position.y][position.x] === DAMAGE
+      ? DAMAGE
+      : MISS;
+  return point;
 };

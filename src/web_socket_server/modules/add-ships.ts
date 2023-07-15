@@ -1,5 +1,4 @@
 import { CustomWebSocket, ShipType } from '../../app/types.js';
-
 import { BOT_ID, FiELD_SIZE, SEA, SHIP } from '../../app/variables.js';
 import { createResponse } from '../../app/healpers.js';
 import { rooms } from '../../data/rooms.js';
@@ -12,7 +11,6 @@ const addShips = (ws: CustomWebSocket, data: string) => {
   if (!room) {
     return;
   }
-
 
   const field = Array(FiELD_SIZE)
     .fill(SEA)
@@ -33,11 +31,8 @@ const addShips = (ws: CustomWebSocket, data: string) => {
   room.fields[indexPlayer] = field;
   room.ships[indexPlayer] = ships;
 
-
-
   if (room.roomUsers.every((user) => room.fields[user.index])) {
     const playersId = room.roomUsers.map((user) => user.index);
-
 
     room.currentPlayer = playersId[Math.round(Math.random())];
 

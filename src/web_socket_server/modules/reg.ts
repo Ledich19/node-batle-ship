@@ -7,6 +7,7 @@ import { wss } from '../../index.js';
 const reg = (ws: WebSocket & { userId: number }, data: string) => {
   const { name, password } = JSON.parse(data);
   const user = users.getByName(name);
+
   const resData = {
     name: name,
     index: 0,
@@ -15,7 +16,7 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
   };
   if (user && user.password !== password) {
     resData.error = true;
-    resData.errorText = 'this name already exists';
+    resData.errorText = 'wrong password or this name already exists';
   }
   if (name.length < 5) {
     resData.error = true;
@@ -43,12 +44,11 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
     resData.index = createdUser.id;
   }
 
-  resData.index > 0 ? (ws.userId = resData.index) : null;
-  
+  ws.userId = resData.index;
+
   const roomsWithOnePlayer = rooms.get()
     .filter((room) => room.roomUsers.length == 1)
     .map((room) => ({ roomId: room.roomId, roomUsers: room.roomUsers }));
-
   ws.send(createResponse('reg', resData));
 
   const winners = users.get().map((user) => ({ name: user.name, wins: user.wins }));
