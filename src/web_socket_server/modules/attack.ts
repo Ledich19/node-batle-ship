@@ -1,9 +1,10 @@
-import { DAMAGE, MISS, SHIP } from '../../app/variables.js';
+import { BOT_ID, DAMAGE, MISS, SHIP } from '../../app/variables.js';
 
 import { checkIsAliveShip, createKilledShip, createResponse } from '../../app/healpers.js';
 import checkEnd from './checkEnd.js';
 import { AttackType, CustomWebSocket, StatusType } from '../../app/types.js';
 import { rooms } from '../../data/rooms.js';
+import botAttack from './botAttack.js';
 
 const attack = (ws: CustomWebSocket, data: string) => {
   const parsedData = JSON.parse(data);
@@ -27,8 +28,8 @@ const attack = (ws: CustomWebSocket, data: string) => {
   if (field && anotherPlayer && room.currentPlayer === indexPlayer) {
     const point = field[y][x] === SHIP ? DAMAGE : field[y][x] === DAMAGE ? DAMAGE : MISS;
     const isAlive = checkIsAliveShip(field, x, y);
-
     field[y][x] = point;
+
 
     let points: AttackType[] = [];
 
@@ -70,6 +71,9 @@ const attack = (ws: CustomWebSocket, data: string) => {
     });
 
     checkEnd(ws, field, indexPlayer);
+    if (ws.room.isSingle && ws.room.currentPlayer === BOT_ID) {
+      botAttack(ws)
+    }
   }
 };
 export default attack;

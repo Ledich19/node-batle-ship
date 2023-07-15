@@ -38,9 +38,9 @@ const randomAttack = (ws: CustomWebSocket, data: string) => {
         ? DAMAGE
         : MISS;
 
+    field[randomElement.y][randomElement.x] = point;
     const isAlive = checkIsAliveShip(field, randomElement.x, randomElement.y);
 
-    field[randomElement.y][randomElement.x] = point;
 
     let points: AttackType[] = [];
     if (isAlive && point === DAMAGE) {

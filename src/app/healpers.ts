@@ -23,14 +23,14 @@ export const checkIsAliveShip = (field: string[][], x: number, y: number): boole
     visited[y][x] = true;
 
     const ship = field[y][x] === SHIP;
-    console.log('SHIP:', x, y, field[y][x], ship);
+  
     if (ship && (x !== startX || y !== startY)) {
-      console.log('YES');
+  
       return true;
     }
 
     const { top, bottom, left, right } = createPoints(field, x, y, [DAMAGE, SHIP]);
-    console.log('TBLR', top, bottom, left, right);
+    
 
     const hasShipTop = top && recursiveCheck(field, top.x, top.y);
     const hasShipBottom = bottom && recursiveCheck(field, bottom.x, bottom.y);
@@ -41,7 +41,7 @@ export const checkIsAliveShip = (field: string[][], x: number, y: number): boole
   };
 
   const result = recursiveCheck(field, x, y);
-  console.log('RESULT:', result);
+  
   return result;
 };
 

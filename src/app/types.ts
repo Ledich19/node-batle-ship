@@ -36,7 +36,7 @@ export type RoomType = {
     [key: string]: string[][] | null
   };
   ships: {
-    [key: string]: [] | null
+    [key: string]: ShipType[] | null
   };
 };
 

@@ -36,7 +36,7 @@ const handleWebSocket = (ws: WebSocket & { userId: number }) => {
       randomAttack(customWs, dataParsed.data)
     }
     if (dataParsed.type === 'single_play') {      
-      singlePlay(customWs, dataParsed.data)
+      singlePlay(customWs)
     }
     console.log('received: %s', data);
   });

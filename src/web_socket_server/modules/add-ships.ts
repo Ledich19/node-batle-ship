@@ -1,20 +1,23 @@
 import { CustomWebSocket, ShipType } from '../../app/types.js';
 
-import { SEA, SHIP } from '../../app/variables.js';
+import { BOT_ID, FiELD_SIZE, SEA, SHIP } from '../../app/variables.js';
 import { createResponse } from '../../app/healpers.js';
 import { rooms } from '../../data/rooms.js';
+import botAttack from './botAttack.js';
 
 const addShips = (ws: CustomWebSocket, data: string) => {
-  const FiELD_SIZE = 10;
+
   const { gameId, ships, indexPlayer } = JSON.parse(data);
   const room = rooms.getById(gameId);
   if (!room) {
-    return
+    return;
   }
+
 
   const field = Array(FiELD_SIZE)
     .fill(SEA)
     .map(() => Array(FiELD_SIZE).fill(SEA));
+
 
   ships.forEach((ship: ShipType) => {
     const { position, direction, length } = ship;
@@ -26,12 +29,15 @@ const addShips = (ws: CustomWebSocket, data: string) => {
       }
     }
   });
+
   room.fields[indexPlayer] = field;
   room.ships[indexPlayer] = ships;
 
+
+
   if (room.roomUsers.every((user) => room.fields[user.index])) {
     const playersId = room.roomUsers.map((user) => user.index);
-    console.log('playersId ', playersId);
+
 
     room.currentPlayer = playersId[Math.round(Math.random())];
 
@@ -45,6 +51,9 @@ const addShips = (ws: CustomWebSocket, data: string) => {
 
       socket.send(createResponse('turn', { currentPlayer: room.currentPlayer }));
     });
+  }
+  if (ws.room.isSingle && ws.room.currentPlayer === BOT_ID) {
+    botAttack(ws)
   }
 };
 export default addShips;
