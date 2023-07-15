@@ -1,7 +1,7 @@
 import { AttackType, Field, PositionXY } from '../../app/types.js';
 import { DAMAGE, MISS, SEA, SHIP } from '../../app/variables.js';
 
-const createPoints = (field: Field, x: number, y: number, rules: string[]) => {
+export const createPoints = (field: Field, x: number, y: number, rules: string[]) => {
   const top = y > 0 && rules.includes(field[y - 1][x]) ? { x, y: y - 1 } : null;
   const bottom = y < field.length - 1 && rules.includes(field[y + 1][x]) ? { x, y: y + 1 } : null;
   const left = x > 0 && rules.includes(field[y][x - 1]) ? { x: x - 1, y } : null;

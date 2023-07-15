@@ -1,21 +1,36 @@
-import { BOT_ID, DAMAGE, MISS, TIME_INTERVAL } from '../../app/variables.js';
+import { BOT_ID, DAMAGE, MISS, SEA, SHIP, TIME_INTERVAL } from '../../app/variables.js';
 import { createResponse } from '../helpers/responses.js';
-import { checkIsAliveShip, checkShoutResult, createKilledShip, getRandomCeil } from '../helpers/field.js';
+import {
+  checkIsAliveShip,
+  checkShoutResult,
+  createKilledShip,
+  createPoints,
+  getRandomCeil,
+} from '../helpers/field.js';
 import checkEnd from './checkEnd.js';
-import { AttackType, CustomWebSocket } from '../../app/types.js';
+import { AttackType, CustomWebSocket, PositionXY } from '../../app/types.js';
 
 const botAttack = (ws: CustomWebSocket) => {
   let isBotAction = true;
   const field = ws.room.fields[ws.userId];
-  let points: AttackType[] = [];
+  const points: AttackType[] = [];
 
   if (!field || ws.room.currentPlayer !== BOT_ID) return;
 
-
   while (isBotAction) {
-    const randomElement = getRandomCeil(field);
+    let nextShot: PositionXY | null = null;
+    const successBotShot = ws.room.successBotShot;
 
-    const point = checkShoutResult(field, randomElement )
+    if (successBotShot) {
+      const goals = createPoints(field, successBotShot.x, successBotShot.y, [SEA, SHIP]);
+      const values = Object.values(goals).filter((el) => !!el);
+      const randomIndex = Math.floor(Math.random() * values.length);
+      nextShot = values[randomIndex];
+    }
+
+    const randomElement = nextShot ? nextShot : getRandomCeil(field);
+    const point = checkShoutResult(field, randomElement);
+
     field[randomElement.y][randomElement.x] = point;
 
     if (point === MISS) {
@@ -34,7 +49,14 @@ const botAttack = (ws: CustomWebSocket) => {
       const isAlive = checkIsAliveShip(field, randomElement.x, randomElement.y);
       if (!isAlive) {
         const killedShip = createKilledShip(field, randomElement.x, randomElement.y, BOT_ID);
-        points = [...points, ...killedShip];
+        setTimeout(() => {
+          ws.room.roomSockets.forEach((socket) => {
+            killedShip.forEach((data) => {
+              socket.send(createResponse('attack', data));
+            });
+          });
+          ws.room.successBotShot = null;
+        }, TIME_INTERVAL);
       } else {
         points.push({
           position: {
@@ -44,6 +66,8 @@ const botAttack = (ws: CustomWebSocket) => {
           currentPlayer: BOT_ID,
           status: 'shot',
         });
+
+        ws.room.successBotShot = { x: randomElement.x, y: randomElement.y };
       }
     }
     checkEnd(ws, field, BOT_ID);

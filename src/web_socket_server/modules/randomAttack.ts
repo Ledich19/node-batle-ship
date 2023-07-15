@@ -1,4 +1,4 @@
-import { DAMAGE } from '../../app/variables.js';
+import { BOT_ID, DAMAGE } from '../../app/variables.js';
 import { createResponse } from '../helpers/responses.js';
 import {
   checkIsAliveShip,
@@ -9,6 +9,7 @@ import {
 import checkEnd from './checkEnd.js';
 import { AttackType, CustomWebSocket, StatusType } from '../../app/types.js';
 import { rooms } from '../../data/rooms.js';
+import botAttack from './botAttack.js';
 
 const randomAttack = (ws: CustomWebSocket, data: string) => {
   const { gameId, indexPlayer } = JSON.parse(data);
@@ -73,6 +74,9 @@ const randomAttack = (ws: CustomWebSocket, data: string) => {
     });
 
     checkEnd(ws, field, indexPlayer);
+    if (ws.room.isSingle && ws.room.currentPlayer === BOT_ID) {
+      botAttack(ws)
+    }
   }
 };
 export default randomAttack;

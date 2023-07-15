@@ -27,6 +27,7 @@ export type RoomType = {
   currentPlayer: number;
   roomId: number;
   isSingle?: boolean;
+  successBotShot?: PositionXY | null;
   roomUsers: {name: string, index: number}[],
     roomSockets: CustomWebSocket[];
   fields: {
