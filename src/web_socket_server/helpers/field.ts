@@ -64,7 +64,6 @@ export const findDAmageShip = (field: Field, x: number, y: number, points: Attac
   ) {
     return { x: right.x, y: right.y };
   }
-
   return null;
 };
 
@@ -235,4 +234,83 @@ export const checkShoutResult = (field: Field, position: PositionXY) => {
       ? DAMAGE
       : MISS;
   return point;
+};
+
+const lokateShip = (field: Field, x: number, y: number): PositionXY[] => {
+  const result: PositionXY[] = [{ x, y }];
+  const visited: boolean[][] = [];
+  const recursive = (x: number, y: number) => {
+    if (typeof x !== 'number' || typeof y !== 'number' || visited[y]?.[x]) {
+      return false;
+    }
+    visited[y] = visited[y] || [];
+    visited[y][x] = true;
+
+    const { top, bottom, left, right } = createPoints(field, x, y, [DAMAGE]);
+
+    if (top) {
+      result.push(top);
+      top && recursive(top.x, top.y);
+    }
+    if (bottom) {
+      result.push(bottom);
+      bottom && recursive(bottom.x, bottom.y);
+    }
+    if (left) {
+      result.push(left);
+      left && recursive(left.x, left.y);
+    }
+    if (right) {
+      result.push(right);
+      right && recursive(right.x, right.y);
+    }
+  };
+  recursive(x, y);
+  return result;
+};
+
+function determineOrientation(cell1: PositionXY, cell2: PositionXY): boolean {
+  if (cell1.x === cell2.x) {
+    // Корабль вертикальный.
+    return true;
+  } else {
+    // Корабль горизонтальный.
+    return false;
+  }
+}
+function findMinMaxProperty(
+  arr: PositionXY[],
+  property: keyof PositionXY
+): { max: number; min: number } {
+  const values = arr.map((item) => item[property]);
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+
+  return { max, min };
+}
+
+export const createShootOption = (field: Field, x: number, y: number) => {
+  const ship = lokateShip(field, x, y);
+  const result: PositionXY[] = [];
+  const orientation = determineOrientation(ship[0], ship[1]);
+
+  if (orientation) {
+    const { max, min } = findMinMaxProperty(ship, 'y');
+    if (max + 1 < field.length && field[max + 1][x] !== MISS) {
+      result.push({ x, y: max + 1 });
+    }
+    if (min - 1 >= 0 && field[min - 1][x] !== MISS) {
+      result.push({ x, y: min - 1 });
+    }
+  } else {
+    const { max, min } = findMinMaxProperty(ship, 'x');
+    if (max + 1 < field[0].length && field[y][max + 1] !== MISS) {
+      result.push({ x: max + 1, y });
+    }
+    if (min - 1 >= 0 && field[y][min - 1] !== MISS) {
+      result.push({ x: min - 1, y });
+    }
+  }
+
+  return result;
 };

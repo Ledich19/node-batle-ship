@@ -5,6 +5,7 @@ import {
   checkShoutResult,
   createKilledShip,
   createPoints,
+  createShootOption,
   getRandomCeil,
 } from '../helpers/field.js';
 import checkEnd from './checkEnd.js';
@@ -22,10 +23,22 @@ const botAttack = (ws: CustomWebSocket) => {
     const successBotShot = ws.room.successBotShot;
 
     if (successBotShot) {
+      const shotOptions = []
       const goals = createPoints(field, successBotShot.x, successBotShot.y, [SEA, SHIP]);
       const values = Object.values(goals).filter((el) => !!el);
-      const randomIndex = Math.floor(Math.random() * values.length);
-      nextShot = values[randomIndex];
+      const damagesPoints = createPoints(field, successBotShot.x, successBotShot.y, [DAMAGE]);
+      const damagesPointsValues = Object.values(damagesPoints).filter((el) => !!el);
+      
+      if (damagesPointsValues.length > 0) {
+        const values = createShootOption(field, successBotShot.x, successBotShot.y)
+        shotOptions.push(...values)
+      } else {
+        shotOptions.push(...values)
+      }
+
+
+      const randomIndex = Math.floor(Math.random() * shotOptions.length);
+      nextShot = shotOptions[randomIndex];
     }
 
     const randomElement = nextShot ? nextShot : getRandomCeil(field);
