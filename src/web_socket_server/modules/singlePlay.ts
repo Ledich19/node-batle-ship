@@ -1,4 +1,4 @@
-import { CustomWebSocket, RoomType, ShipType, SizeType } from '../../app/types.js';
+import { CustomWebSocket, RoomType, ShipType } from '../../app/types.js';
 
 import { BOT_ID, FiELD_SIZE, SEA, SHIP } from '../../app/variables.js';
 import { createResponse } from '../../app/healpers.js';

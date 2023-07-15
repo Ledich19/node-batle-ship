@@ -1,4 +1,4 @@
-import { DAMAGE, MISS, SHIP } from '../../app/variables.js';
+import { DAMAGE } from '../../app/variables.js';
 import {
   checkIsAliveShip,
   checkShoutResult,

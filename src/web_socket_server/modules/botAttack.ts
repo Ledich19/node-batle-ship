@@ -1,4 +1,4 @@
-import { BOT_ID, DAMAGE, MISS, SHIP, TIME_INTERVAL } from '../../app/variables.js';
+import { BOT_ID, DAMAGE, MISS, TIME_INTERVAL } from '../../app/variables.js';
 
 import { checkIsAliveShip, checkShoutResult, createKilledShip, createResponse, getRandomCeil } from '../../app/healpers.js';
 import checkEnd from './checkEnd.js';
