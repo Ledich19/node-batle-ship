@@ -1,11 +1,11 @@
 import { DAMAGE } from '../../app/variables.js';
+import { createResponse } from '../helpers/responses.js';
 import {
   checkIsAliveShip,
   checkShoutResult,
   createKilledShip,
-  createResponse,
   getRandomCeil,
-} from '../../app/healpers.js';
+} from '../helpers/field.js';
 import checkEnd from './checkEnd.js';
 import { AttackType, CustomWebSocket, StatusType } from '../../app/types.js';
 import { rooms } from '../../data/rooms.js';

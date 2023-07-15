@@ -1,7 +1,7 @@
 import { CustomWebSocket, ShipType } from '../../app/types.js';
 import { BOT_ID, FiELD_SIZE, SEA, SHIP } from '../../app/variables.js';
-import { createResponse } from '../../app/healpers.js';
 import { rooms } from '../../data/rooms.js';
+import { createResponse } from '../helpers/responses.js';
 import botAttack from './botAttack.js';
 
 const addShips = (ws: CustomWebSocket, data: string) => {

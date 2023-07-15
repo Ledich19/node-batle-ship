@@ -1,5 +1,5 @@
-import { AttackType, Field, PositionXY, ResponseType } from './types.js';
-import { DAMAGE, MISS, SEA, SHIP } from './variables.js';
+import { AttackType, Field, PositionXY } from '../../app/types.js';
+import { DAMAGE, MISS, SEA, SHIP } from '../../app/variables.js';
 
 const createPoints = (field: Field, x: number, y: number, rules: string[]) => {
   const top = y > 0 && rules.includes(field[y - 1][x]) ? { x, y: y - 1 } : null;
@@ -66,15 +66,6 @@ export const findDAmageShip = (field: Field, x: number, y: number, points: Attac
   }
 
   return null;
-};
-
-export const createResponse = <T>(type: ResponseType, data: T): string => {
-  const response = {
-    type: type,
-    data: JSON.stringify(data),
-    id: 0,
-  };
-  return JSON.stringify(response);
 };
 
 export const createKilledShip = (

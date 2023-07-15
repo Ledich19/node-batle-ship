@@ -1,8 +1,8 @@
 import WebSocket from 'ws';
 import { users } from '../../data/users.js';
-import { rooms } from '../../data/rooms.js';
-import { createResponse } from '../../app/healpers.js';
-import { wss } from '../../index.js';
+import { createResponse } from '../helpers/responses.js';
+import { updateRoomsAndWinnersForAll } from '../helpers/responses.js';
+
 
 const reg = (ws: WebSocket & { userId: number }, data: string) => {
   const { name, password } = JSON.parse(data);
@@ -45,18 +45,7 @@ const reg = (ws: WebSocket & { userId: number }, data: string) => {
   }
 
   ws.userId = resData.index;
-
-  const roomsWithOnePlayer = rooms.get()
-    .filter((room) => room.roomUsers.length == 1)
-    .map((room) => ({ roomId: room.roomId, roomUsers: room.roomUsers }));
   ws.send(createResponse('reg', resData));
-
-  const winners = users.get().map((user) => ({ name: user.name, wins: user.wins }));
-
-  wss.clients.forEach((client) => {
-    ws.send(createResponse('update_room', roomsWithOnePlayer));
-    client.send(createResponse('update_winners', winners));
-  });
-
+  updateRoomsAndWinnersForAll()
 };
 export default reg;

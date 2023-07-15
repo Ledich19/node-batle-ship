@@ -1,6 +1,6 @@
 import { BOT_ID, DAMAGE, MISS, TIME_INTERVAL } from '../../app/variables.js';
-
-import { checkIsAliveShip, checkShoutResult, createKilledShip, createResponse, getRandomCeil } from '../../app/healpers.js';
+import { createResponse } from '../helpers/responses.js';
+import { checkIsAliveShip, checkShoutResult, createKilledShip, getRandomCeil } from '../helpers/field.js';
 import checkEnd from './checkEnd.js';
 import { AttackType, CustomWebSocket } from '../../app/types.js';
 

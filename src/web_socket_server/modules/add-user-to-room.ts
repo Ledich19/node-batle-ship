@@ -1,6 +1,6 @@
 import { users } from '../../data/users.js';
 import { rooms } from '../../data/rooms.js';
-import { createResponse } from '../../app/healpers.js';
+import { createResponse } from '../helpers/responses.js';
 import { CustomWebSocket } from '../../app/types.js';
 
 const addUserToRoom = (ws: CustomWebSocket, data: string) => {

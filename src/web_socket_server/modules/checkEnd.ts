@@ -1,9 +1,9 @@
 import { DAMAGE, SHIP_POINTS } from '../../app/variables.js';
-import { wss } from '../../index.js';
 import { users } from '../../data/users.js';
-import { createResponse } from '../../app/healpers.js';
+import { createResponse } from '../helpers/responses.js';
 import { CustomWebSocket } from '../../app/types.js';
 import { rooms } from '../../data/rooms.js';
+import { updateRoomsAndWinnersForAll } from '../helpers/responses.js';
 
 const checkEnd = (ws: CustomWebSocket, field: string[][], player: number) => {
   if (!field) {
@@ -17,17 +17,13 @@ const checkEnd = (ws: CustomWebSocket, field: string[][], player: number) => {
     return total;
   }, 0);
 
-  
   if (damagePoints === SHIP_POINTS) {
     users.setWinner(player);
-    const winners = users.get().map((user) => ({ name: user.name, wins: user.wins }));
-    rooms.remove(ws.room.roomId)
+    rooms.remove(ws.room.roomId);
+    updateRoomsAndWinnersForAll()
 
     ws.room.roomSockets.forEach((socket) => {
       socket.send(createResponse('finish', { winPlayer: player }));
-    });
-    wss.clients.forEach((client) => {
-      client.send(createResponse('update_winners', winners));
     });
   }
 };

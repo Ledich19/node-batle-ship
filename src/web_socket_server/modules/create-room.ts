@@ -1,17 +1,14 @@
 import { rooms } from '../../data/rooms.js';
 import { users } from '../../data/users.js';
-import { wss } from '../../index.js';
-import { createResponse } from '../../app/healpers.js';
 import { CustomWebSocket } from '../../app/types.js';
+import { updateRoomsAndWinnersForAll } from '../helpers/responses.js';
 
 const createRoom = (ws: CustomWebSocket) => {
   const roomId = rooms.createId();
   const { userId } = ws;
   const user = users.getById(userId);
 
-  if (!user) {
-    return;
-  }
+  if (!user) return;
 
   const room = {
     currentPlayer: userId,
@@ -23,18 +20,11 @@ const createRoom = (ws: CustomWebSocket) => {
     },
     ships: {
       userId: null,
-    }
+    },
   };
 
-  const roomsData = rooms.create(room);
+  rooms.create(room);
   ws.room = room;
-
-  const roomsWithOnePlayer = roomsData
-    .filter((room) => room.roomUsers.length == 1)
-    .map((room) => ({ roomId: room.roomId, roomUsers: room.roomUsers }));
-
-  wss.clients.forEach((client) => {
-    client.send(createResponse('update_room', roomsWithOnePlayer));
-  });
+  updateRoomsAndWinnersForAll;
 };
 export default createRoom;
