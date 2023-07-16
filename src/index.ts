@@ -1,15 +1,6 @@
-import http from 'http';
-import { WebSocketServer } from 'ws';
-import handleHTTP from './http_server/index.js';
-import handleWebSocket from './web_socket_server/index.js';
-// const HTTP_PORT = 3000;
+import { server } from "./server.js";
 
-export const server = http.createServer(handleHTTP);
-export const wss = new WebSocketServer({ server: server });
-wss.on('connection', handleWebSocket);
+const HTTP_PORT = 3000;
 
-server.on('upgrade', function upgrade() {
-  console.log('--- upgrade:');
-});
-
-
+console.log(`Start static http server on the ${HTTP_PORT} port!`);
+server.listen(HTTP_PORT);

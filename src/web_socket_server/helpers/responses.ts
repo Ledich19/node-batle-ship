@@ -1,7 +1,7 @@
 import { ResponseType } from "../../app/types.js";
 import { rooms } from "../../data/rooms.js";
 import { users } from "../../data/users.js";
-import { wss } from "../../index.js";
+import { wss } from "../../server.js";
 
 export const createResponse = <T>(type: ResponseType, data: T): string => {
   const response = {

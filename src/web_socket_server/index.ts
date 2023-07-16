@@ -13,33 +13,39 @@ const handleWebSocket = (ws: WebSocket & { userId: number }) => {
   ws.on('message', (data: string) => {
     const dataParsed = JSON.parse(data);
     console.log('TYPE:', dataParsed.type);
-    const customWs = ws as CustomWebSocket
-    
+    const customWs = ws as CustomWebSocket;
+
     if (dataParsed.type === 'reg') {
-     reg(ws, dataParsed.data)
+      reg(ws, dataParsed.data);
     }
     if (dataParsed.type === 'create_room') {
-      createRoom(customWs)
+      createRoom(customWs);
     }
-    if (dataParsed.type === 'add_ships') {      
-      addShips(customWs, dataParsed.data)
+    if (dataParsed.type === 'add_ships') {
+      addShips(customWs, dataParsed.data);
     }
-    if (dataParsed.type === 'add_user_to_room') {      
-      addUserToRoom(customWs, dataParsed.data)
+    if (dataParsed.type === 'add_user_to_room') {
+      addUserToRoom(customWs, dataParsed.data);
     }
-    if (dataParsed.type === 'attack') {      
-      attack(customWs, dataParsed.data)
+    if (dataParsed.type === 'attack') {
+      attack(customWs, dataParsed.data);
     }
-    if (dataParsed.type === 'randomAttack') {      
-      randomAttack(customWs, dataParsed.data)
+    if (dataParsed.type === 'randomAttack') {
+      randomAttack(customWs, dataParsed.data);
     }
-    if (dataParsed.type === 'single_play') {      
-      singlePlay(customWs)
+    if (dataParsed.type === 'single_play') {
+      singlePlay(customWs);
     }
     console.log('received: %s', data);
   });
 
-  ws.send('something');
+  ws.on('close', function handleClose() {
+    console.log('--- WebSocket closed');
+  });
+
+  ws.on('error', function handleError(error) {
+    console.error('WebSocket error:', error.message);
+  });
 };
 
 export default handleWebSocket;
