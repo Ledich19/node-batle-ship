@@ -2,7 +2,8 @@
 /node_modules
 .env
 sessions.json
-dist
+/dist
+/build
 
 # System Files
 .DS_Store
